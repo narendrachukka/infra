@@ -25,7 +25,6 @@ type Example struct {
 
 	Nested
 
-	// TODO: squashed struct
 	// TODO: slice, and map
 	// TODO: type that defines Unmarshal/Decode method
 	// TODO: overrides

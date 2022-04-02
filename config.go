@@ -47,7 +47,7 @@ func loadFromFile(target interface{}, opts Options) error {
 	}
 
 	cfg := mapstructure.DecoderConfig{
-		// TODO: Squash:           false,
+		Squash:  true,
 		Result:  target,
 		TagName: opts.FieldTagName,
 		MatchName: func(key string, fieldName string) bool {
@@ -70,7 +70,7 @@ func loadFromEnv(target interface{}, opts Options) error {
 		// TODO: probably copy this instead of import
 		// TODO: filter vars to only those that start with EnvPrefix
 		vars:     env.ToMap(os.Environ()),
-		location: []string{opts.EnvPrefix},
+		location: []string{strings.ToUpper(opts.EnvPrefix)},
 	}
 
 	if err := reflectwalk.Walk(target, walker); err != nil {
@@ -101,11 +101,7 @@ func (w *envWalker) Struct(value reflect.Value) error {
 		Result:           value.Addr().Interface(),
 		TagName:          w.opts.FieldTagName,
 		WeaklyTypedInput: true,
-		MatchName: func(key string, fieldName string) bool {
-			path := strings.Join(w.location, "_")
-			name := strings.ToUpper(path + "_" + strcase.ToSnake(fieldName))
-			return key == name
-		},
+		MatchName:        w.matchName,
 	}
 	decoder, err := mapstructure.NewDecoder(&cfg)
 	if err != nil {
@@ -119,9 +115,26 @@ func (w *envWalker) Struct(value reflect.Value) error {
 
 func (w *envWalker) StructField(field reflect.StructField, value reflect.Value) error {
 	if value.Kind() == reflect.Struct || isPtrToStruct(value) {
-		w.location = append(w.location, strcase.ToSnake(field.Name))
+		if field.Anonymous { // embedded struct
+			w.location = append(w.location, "")
+			return nil
+		}
+		w.location = append(w.location, strings.ToUpper(strcase.ToSnake(field.Name)))
 	}
 	return nil
+}
+
+func (w *envWalker) matchName(key string, fieldName string) bool {
+	var sb strings.Builder
+	for _, part := range w.location {
+		if part == "" {
+			continue
+		}
+		sb.WriteString(part)
+		sb.WriteString("_")
+	}
+	sb.WriteString(strings.ToUpper(strcase.ToSnake(fieldName)))
+	return key == sb.String()
 }
 
 func isPtrToStruct(value reflect.Value) bool {

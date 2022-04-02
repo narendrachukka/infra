@@ -23,9 +23,12 @@ type Example struct {
 	Nest    Nested
 	NestPtr *Nested
 
+	Nested
+
 	// TODO: squashed struct
 	// TODO: slice, and map
 	// TODO: type that defines Unmarshal/Decode method
+	// TODO: overrides
 }
 
 type Nested struct {
@@ -54,6 +57,8 @@ nest:
 nest_ptr:
     two: "the-value"
     ratio: 3.15
+
+two: "from-file-3"
 `
 	f := fs.NewFile(t, t.Name(), fs.WithContent(content))
 
@@ -65,6 +70,7 @@ nest_ptr:
 	t.Setenv("APPNAME_NEST_RATIO", "3.14")
 	t.Setenv("APPNAME_NEST_PTR_TWINE", "from-env-3")
 	t.Setenv("APPNAME_NEST_PTR_FLAG", "true")
+	t.Setenv("APPNAME_TWINE", "from-env-4")
 
 	target := Example{
 		One:         "left-as-default",
@@ -103,6 +109,10 @@ nest_ptr:
 			Twine: "from-env-3",
 			Flag:  true,
 			Ratio: 3.15,
+		},
+		Nested: Nested{
+			Two:   "from-file-3",
+			Twine: "from-env-4",
 		},
 	}
 	assert.DeepEqual(t, target, expected)

@@ -11,5 +11,6 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 )

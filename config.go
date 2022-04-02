@@ -7,6 +7,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
 
@@ -14,6 +15,7 @@ type Options struct {
 	FieldTagName string
 	Filename     string
 	EnvPrefix    string
+	Flags        func(fn func(*pflag.Flag))
 	Overrides    []string
 }
 
@@ -28,6 +30,11 @@ func Load(target interface{}, opts Options) error {
 	}
 	if opts.EnvPrefix != "" {
 		if err := loadFromEnv(target, opts); err != nil {
+			return err
+		}
+	}
+	if opts.Flags != nil {
+		if err := loadFromFlags(target, opts); err != nil {
 			return err
 		}
 	}

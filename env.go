@@ -9,13 +9,18 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mitchellh/reflectwalk"
+	"github.com/spf13/pflag"
 )
 
 func loadFromEnv(target interface{}, opts Options) error {
 	opts.EnvPrefix = strings.ToUpper(opts.EnvPrefix)
-	walker := &envWalker{
-		vars:     toMap(opts.EnvPrefix, os.Environ()),
+	walker := &flatSourceWalker{
+		source:   toMap(opts.EnvPrefix, os.Environ()),
 		location: []string{opts.EnvPrefix},
+		fieldNameFormat: func(name string) string {
+			return strings.ToUpper(strcase.ToSnake(name))
+		},
+		fieldSeparator: "_",
 	}
 
 	if err := reflectwalk.Walk(target, walker); err != nil {
@@ -24,24 +29,46 @@ func loadFromEnv(target interface{}, opts Options) error {
 	return nil
 }
 
-type envWalker struct {
-	opts     Options
-	location []string
-	vars     map[string]string
-}
+func loadFromFlags(target interface{}, opts Options) error {
+	source := map[string]string{}
+	opts.Flags(func(flag *pflag.Flag) {
+		// TODO: a better way to get values out of flags...
+		// TODO: will not work for some flag types.
+		source[flag.Name] = flag.Value.String()
+	})
 
-func (w *envWalker) Enter(reflectwalk.Location) error {
+	walker := &flatSourceWalker{
+		source:          source,
+		fieldNameFormat: strcase.ToKebab,
+		fieldSeparator:  "-",
+	}
+
+	if err := reflectwalk.Walk(target, walker); err != nil {
+		return fmt.Errorf("failed to decode from environment variables: %w", err)
+	}
 	return nil
 }
 
-func (w *envWalker) Exit(loc reflectwalk.Location) error {
+type flatSourceWalker struct {
+	opts            Options
+	location        []string
+	source          map[string]string
+	fieldNameFormat func(string) string
+	fieldSeparator  string
+}
+
+func (w *flatSourceWalker) Enter(reflectwalk.Location) error {
+	return nil
+}
+
+func (w *flatSourceWalker) Exit(loc reflectwalk.Location) error {
 	if loc == reflectwalk.Struct && len(w.location) > 0 {
 		w.location = w.location[:len(w.location)-1]
 	}
 	return nil
 }
 
-func (w *envWalker) Struct(value reflect.Value) error {
+func (w *flatSourceWalker) Struct(value reflect.Value) error {
 	cfg := mapstructure.DecoderConfig{
 		Result:           value.Addr().Interface(),
 		TagName:          w.opts.FieldTagName,
@@ -52,33 +79,33 @@ func (w *envWalker) Struct(value reflect.Value) error {
 	if err != nil {
 		return fmt.Errorf("failed to create decoder for struct: %w", err)
 	}
-	if err := decoder.Decode(w.vars); err != nil {
+	if err := decoder.Decode(w.source); err != nil {
 		return fmt.Errorf("failed to decode into struct: %w", err)
 	}
 	return nil
 }
 
-func (w *envWalker) StructField(field reflect.StructField, value reflect.Value) error {
+func (w *flatSourceWalker) StructField(field reflect.StructField, value reflect.Value) error {
 	if value.Kind() == reflect.Struct || isPtrToStruct(value) {
 		if field.Anonymous { // embedded struct
 			w.location = append(w.location, "")
 			return nil
 		}
-		w.location = append(w.location, strings.ToUpper(strcase.ToSnake(field.Name)))
+		w.location = append(w.location, w.fieldNameFormat(field.Name))
 	}
 	return nil
 }
 
-func (w *envWalker) matchName(key string, fieldName string) bool {
+func (w *flatSourceWalker) matchName(key string, fieldName string) bool {
 	var sb strings.Builder
 	for _, part := range w.location {
-		if part == "" {
+		if part == "" { // skip empty part for embedded struct
 			continue
 		}
 		sb.WriteString(part)
-		sb.WriteString("_")
+		sb.WriteString(w.fieldSeparator)
 	}
-	sb.WriteString(strings.ToUpper(strcase.ToSnake(fieldName)))
+	sb.WriteString(w.fieldNameFormat(fieldName))
 	return key == sb.String()
 }
 

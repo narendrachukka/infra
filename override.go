@@ -41,6 +41,7 @@ func restructure(flat []string) map[string]interface{} {
 func parseOverride(item string) ([]string, string) {
 	parts := strings.SplitN(item, "=", 2)
 	if len(parts) < 2 {
+		// TODO: should be an error
 		return nil, ""
 	}
 	return strings.Split(parts[0], "."), parts[1]

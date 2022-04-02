@@ -15,3 +15,4 @@ Configuration is loaded in order from the following sources:
 
 * generating markdown documentation for a configuration struct
 * nested structs
+* use reasonable conventions to remove the need for many struct field tags

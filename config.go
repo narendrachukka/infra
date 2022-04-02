@@ -14,6 +14,7 @@ type Options struct {
 	FieldTagName string
 	Filename     string
 	EnvPrefix    string
+	Overrides    []string
 }
 
 func Load(target interface{}, opts Options) error {
@@ -30,6 +31,11 @@ func Load(target interface{}, opts Options) error {
 			return err
 		}
 	}
+	if len(opts.Overrides) > 0 {
+		if err := loadFromOverrides(target, opts); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -43,6 +49,13 @@ func loadFromFile(target interface{}, opts Options) error {
 		return fmt.Errorf("failed to decode yaml from %s: %w", opts.Filename, err)
 	}
 
+	if err := decode(target, raw, opts); err != nil {
+		return fmt.Errorf("failed to decode from %s: %w", opts.Filename, err)
+	}
+	return nil
+}
+
+func decode(target interface{}, raw map[string]interface{}, opts Options) error {
 	cfg := mapstructure.DecoderConfig{
 		Squash:  true,
 		Result:  target,
@@ -53,11 +66,7 @@ func loadFromFile(target interface{}, opts Options) error {
 	}
 	decoder, err := mapstructure.NewDecoder(&cfg)
 	if err != nil {
-		return fmt.Errorf("failed to create decoder: %w", err)
+		return err
 	}
-	if err := decoder.Decode(raw); err != nil {
-		return fmt.Errorf("failed to decode from %s: %w", opts.Filename, err)
-	}
-
-	return nil
+	return decoder.Decode(raw)
 }

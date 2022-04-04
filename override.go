@@ -7,7 +7,6 @@ import (
 
 func loadFromOverrides(target interface{}, opts Options) error {
 	raw := restructure(opts.Overrides)
-	fmt.Println(raw)
 
 	if err := decode(target, raw, opts); err != nil {
 		return fmt.Errorf("failed to decode from overrides: %w", err)

@@ -199,7 +199,7 @@ two: "from-file-3"
 	opts := Options{
 		Filename:  f.Path(),
 		EnvPrefix: "APPNAME",
-		Flags:     flags.VisitAll,
+		Flags:     flags,
 		Overrides: []string{
 			"more=from-override-1",
 			"nest.another=from-override-2",

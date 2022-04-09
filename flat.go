@@ -31,7 +31,7 @@ func loadFromEnv(target interface{}, opts Options) error {
 
 func loadFromFlags(target interface{}, opts Options) error {
 	source := map[string]string{}
-	opts.Flags(func(flag *pflag.Flag) {
+	opts.Flags.VisitAll(func(flag *pflag.Flag) {
 		// TODO: a better way to get values out of flags...
 		// TODO: will not work for some flag types.
 		source[flag.Name] = flag.Value.String()

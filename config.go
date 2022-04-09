@@ -7,7 +7,6 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
-	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
 
@@ -15,7 +14,7 @@ type Options struct {
 	FieldTagName string
 	Filename     string
 	EnvPrefix    string
-	Flags        func(fn func(*pflag.Flag))
+	Flags        FlagSet
 	Overrides    []string
 }
 

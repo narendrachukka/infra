@@ -45,23 +45,20 @@ const cliLoginRedirectURL = "http://localhost:8301"
 
 func newLoginCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "login [SERVER]",
+		Use:   "login [URL]",
 		Short: "Login to Infra",
-		Example: `
-# By default, login will prompt for all required information.
+		Example: `.
 $ infra login
 
 # Login to a specified server
-$ infra login SERVER
-$ infra login --server SERVER
+$ infra login URL
+$ infra login --url URL
 
 # Login with an access key
 $ infra login --key KEY
 
 # Login with a specified provider
 $ infra login --provider NAME
-
-# Use the '--non-interactive' flag to error out instead of prompting.
 `,
 		Args:  cobra.MaximumNArgs(1),
 		Group: "Core commands:",
@@ -85,7 +82,7 @@ $ infra login --provider NAME
 	}
 
 	cmd.Flags().String("key", "", "Login with an access key")
-	cmd.Flags().String("server", "", "Infra server to login to")
+	cmd.Flags().String("url", "", "URL to login to")
 	cmd.Flags().String("provider", "", "Login with an identity provider")
 	cmd.Flags().Bool("skip-tls-verify", false, "Skip verifying server TLS certificates")
 	return cmd

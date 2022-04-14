@@ -9,19 +9,20 @@ import (
 )
 
 func newLogoutCmd() *cobra.Command {
-	var purge bool
+	var clear bool
 
 	cmd := &cobra.Command{
 		Use:     "logout",
 		Short:   "Log out of Infra",
+		Long:    `Log out of all sessions`,
 		Example: "$ infra logout",
 		Group:   "Core commands:",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return logout(purge)
+			return logout(clear)
 		},
 	}
 
-	cmd.Flags().BoolVar(&purge, "purge", false, "remove Infra host from config")
+	cmd.Flags().BoolVar(&clear, "clear", false, "Forget list of servers saved")
 
 	return cmd
 }

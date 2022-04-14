@@ -45,13 +45,10 @@ func newIdentitiesAddCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add IDENTITY",
 		Short: "Create an identity.",
-		Long: `Create a machine identity with NAME or a user identity with EMAIL.
+		Long: `Create an identity.
+If an email is provided, a user is created; otherwise, a machine is created.
 
-NAME must only contain alphanumeric characters ('a-z', 'A-Z', '0-9') or the
-special characters '-', '_', or '/' and has a maximum length of 256 characters.
-
-EMAIL must contain a valid email address in the form of "local@domain".
-		`,
+If a user is created, a one time password is provided that must be changed on first login.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
@@ -132,7 +129,7 @@ func newIdentitiesListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "List all identities",
+		Short:   "List identities",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := defaultAPIClient()
 			if err != nil {

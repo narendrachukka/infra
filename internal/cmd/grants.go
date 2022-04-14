@@ -170,20 +170,19 @@ func newGrantAddCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add IDENTITY DESTINATION",
 		Short: "Grant access to a destination",
-		Long: `Grant one or more identities access to a destination. 
+		Long:  "Grant one or more identities access to a destination",
+		Example: `# Grant an identity access to a destination
+$ infra grants add johndoe@acme.com kubernetes.docker-desktop 
+$ infra grants add machineA kubernetes.docker-desktop
 
-IDENTITY is the subject that is being given access.
-DESTINATION is what the identity will gain access to. 
+# Grant a group accexss to a destination 
+$ infra grants add devGroup kubernetes.staging --group
 
-Use [--role] if further fine grained permissions are needed. If not specified, user will gain the permission 'connect' to the destination. 
-$ infra grants add ... -role admin ...
+# Grant access with fine-grained permissions
+$ infra grants add johndoe@acme.com kubernetes.staging --role viewer
 
-Use [--group] or [-g] if identity is of type group. 
-$ infra grants add devGroup -group ...
-$ infra grants add devGroup -g ...
-
-For full documentation on grants with more examples, see: 
-  https://github.com/infrahq/infra/blob/main/docs/guides
+# Assign a user a role within Infra
+$ infra grants add johndoe@acme.com infra --role admin
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

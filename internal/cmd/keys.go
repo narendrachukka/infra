@@ -16,7 +16,7 @@ func newKeysCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "keys",
 		Short:   "Manage access keys",
-		Long:    "Manage access keys for machine identities to authenticate with Infra and call the API",
+		Long:    "Manage access keys for identities",
 		Aliases: []string{"key"},
 		Group:   "Management commands:",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -39,7 +39,7 @@ type keyCreateOptions struct {
 func newKeysAddCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add ACCESS_KEY_NAME MACHINE_NAME",
-		Short: "Create an access key for authentication",
+		Short: "Create an access key",
 		Example: `
 # Create an access key for the machine "bot" called "first-key" that expires in 12 hours and must be used every hour to remain valid
 infra keys add first-key bot --ttl=12h --extension-deadline=1h

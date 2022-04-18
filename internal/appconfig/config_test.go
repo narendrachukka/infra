@@ -89,12 +89,6 @@ two: "from-file-3"
 	opts := Options{
 		Filename:  f.Path(),
 		EnvPrefix: "APPNAME",
-		Overrides: []string{
-			"more=from-override-1",
-			"nest.another=from-override-2",
-			"nest_ptr.another=from-override-3",
-			"another=from-override-4",
-		},
 	}
 	err := Load(&target, opts)
 	assert.NilError(t, err)
@@ -109,25 +103,23 @@ two: "from-file-3"
 		BoolFromEnv:   true,
 		UintFromEnv:   412,
 		NetIPFromEnv:  "0.0.0.0",
-		More:          "from-override-1",
+		More:          "not-this-either",
 		Nest: Nested{
 			Two:     "left-as-default-2",
 			Twine:   "from-env-2",
 			Numb:    -2,
 			Ratio:   3.14,
-			Another: "from-override-2",
+			Another: "not-this",
 		},
 		NestPtr: &Nested{
-			Two:     "the-value",
-			Twine:   "from-env-3",
-			Flag:    true,
-			Ratio:   3.15,
-			Another: "from-override-3",
+			Two:   "the-value",
+			Twine: "from-env-3",
+			Flag:  true,
+			Ratio: 3.15,
 		},
 		Nested: Nested{
-			Two:     "from-file-3",
-			Twine:   "from-env-4",
-			Another: "from-override-4",
+			Two:   "from-file-3",
+			Twine: "from-env-4",
 		},
 	}
 	assert.DeepEqual(t, target, expected)
@@ -200,12 +192,6 @@ two: "from-file-3"
 		Filename:  f.Path(),
 		EnvPrefix: "APPNAME",
 		Flags:     flags,
-		Overrides: []string{
-			"more=from-override-1",
-			"nest.another=from-override-2",
-			"nest_ptr.another=from-override-3",
-			"another=from-override-4",
-		},
 	}
 	err = Load(&target, opts)
 	assert.NilError(t, err)
@@ -220,25 +206,23 @@ two: "from-file-3"
 		BoolFromEnv:   true,
 		UintFromEnv:   412,
 		NetIPFromEnv:  "0.0.0.0",
-		More:          "from-override-1",
+		More:          "not-this-either",
 		Nest: Nested{
 			Two:     "left-as-default-2",
 			Twine:   "from-flag-2",
 			Numb:    -2,
 			Ratio:   3.14,
-			Another: "from-override-2",
+			Another: "not-this",
 		},
 		NestPtr: &Nested{
-			Two:     "the-value",
-			Twine:   "from-env-3",
-			Flag:    true,
-			Ratio:   3.15,
-			Another: "from-override-3",
+			Two:   "the-value",
+			Twine: "from-env-3",
+			Flag:  true,
+			Ratio: 3.15,
 		},
 		Nested: Nested{
-			Two:     "from-flag-3",
-			Twine:   "from-env-4",
-			Another: "from-override-4",
+			Two:   "from-flag-3",
+			Twine: "from-env-4",
 		},
 	}
 	assert.DeepEqual(t, target, expected)

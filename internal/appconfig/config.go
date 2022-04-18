@@ -15,7 +15,6 @@ type Options struct {
 	Filename     string
 	EnvPrefix    string
 	Flags        FlagSet
-	Overrides    []string
 }
 
 func Load(target interface{}, opts Options) error {
@@ -34,11 +33,6 @@ func Load(target interface{}, opts Options) error {
 	}
 	if opts.Flags != nil {
 		if err := loadFromFlags(target, opts); err != nil {
-			return err
-		}
-	}
-	if len(opts.Overrides) > 0 {
-		if err := loadFromOverrides(target, opts); err != nil {
 			return err
 		}
 	}

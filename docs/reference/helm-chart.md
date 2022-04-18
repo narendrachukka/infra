@@ -153,13 +153,10 @@ server:
 # Remove Infra
 helm uninstall infra
 
-# Remove potential secrets created for Infra
-kubectl delete secret/infra-okta
-
-# Remove rolebindings & clusterrolebindings created by Infra connector
-kubectl delete clusterrolebindings,rolebindings -l app.kubernetes.io/managed-by=infra --all-namespaces
+# On all clusters:
+# Remove rolebindings & clusterrolebindings created by Infra
+kubectl delete clusterrolebindings,rolebindings,serviceaccounts -l app.kubernetes.io/managed-by=infra --all-namespaces
 ```
 
 [1]: configuration.md
 [2]: postgres.md
-[3]: #infra-connector

@@ -6,6 +6,7 @@
 * [infra logout](#infra-logout)
 * [infra list](#infra-list)
 * [infra use](#infra-use)
+* [infra destinations add](#infra-destinations-add)
 * [infra destinations list](#infra-destinations-list)
 * [infra destinations remove](#infra-destinations-remove)
 * [infra grants list](#infra-grants-list)
@@ -147,6 +148,21 @@ $ infra use development
 
 # Use a Kubernetes namespace context
 $ infra use development.kube-system
+```
+
+### Options inherited from parent commands
+
+```
+      --help               Display help
+      --log-level string   Show logs when running the command [error, warn, info, debug] (default "info")
+```
+
+## `infra destinations add`
+
+Add a destination
+
+```
+infra destinations add DESTINATION [flags]
 ```
 
 ### Options inherited from parent commands

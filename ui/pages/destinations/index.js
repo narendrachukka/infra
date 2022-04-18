@@ -127,7 +127,7 @@ function columns (admin) {
                     setOpen(false)
                   }}
                   title='Delete Cluster'
-                  message={<>Are you sure you want to disconnect <span className='text-white font-bold'>{name}?</span><br />Note: you must also uninstall the Infra Connector from this cluster.</>}
+                  message={<>Are you sure you want to disconnect <span className='text-white font-bold'>{name}?</span></>}
                 />
               </div>
             )

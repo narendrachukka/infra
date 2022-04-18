@@ -68,7 +68,7 @@ func TestCertificatesImplementations(t *testing.T) {
 		}
 
 		t.Run("signing Cert Signing Requests", func(t *testing.T) {
-			cert, err := generateClientCertificate("Connector")
+			cert, err := generateClientCertificate("User")
 			assert.NilError(t, err)
 
 			csr := x509.CertificateRequest{

@@ -9,7 +9,7 @@ import (
 )
 
 func CreateDestination(c *gin.Context, destination *models.Destination) error {
-	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraConnectorRole)
+	db, err := RequireInfraRole(c, models.InfraAdminRole)
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func CreateDestination(c *gin.Context, destination *models.Destination) error {
 }
 
 func SaveDestination(c *gin.Context, destination *models.Destination) error {
-	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraConnectorRole)
+	db, err := RequireInfraRole(c, models.InfraAdminRole)
 	if err != nil {
 		return err
 	}

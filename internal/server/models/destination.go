@@ -7,23 +7,22 @@ import (
 type Destination struct {
 	Model
 
-	Name     string `validate:"required"`
-	UniqueID string `gorm:"uniqueIndex:,where:deleted_at is NULL"`
+	Name string `gorm:"uniqueIndex:,where:deleted_at is NULL" validate:"required"`
 
-	ConnectionURL string
-	ConnectionCA  string
+	CA    string
+	URL   string
+	Token EncryptedAtRest
 }
 
 func (d *Destination) ToAPI() *api.Destination {
 	return &api.Destination{
-		ID:       d.ID,
-		Created:  api.Time(d.CreatedAt),
-		Updated:  api.Time(d.UpdatedAt),
-		Name:     d.Name,
-		UniqueID: d.UniqueID,
+		ID:      d.ID,
+		Created: api.Time(d.CreatedAt),
+		Updated: api.Time(d.UpdatedAt),
+		Name:    d.Name,
 		Connection: api.DestinationConnection{
-			URL: d.ConnectionURL,
-			CA:  d.ConnectionCA,
+			URL: d.URL,
+			CA:  d.CA,
 		},
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 
 	"github.com/infrahq/infra/internal"
 	"github.com/infrahq/infra/internal/generate"
@@ -32,7 +33,7 @@ func TestListIdentities(t *testing.T) {
 	ids, err := ListIdentities(c, "", nil)
 	assert.NilError(t, err)
 
-	assert.Equal(t, len(ids), 4) // the two identities created, the admin one used to call these access functions, and the internal connector identity
+	assert.Assert(t, is.Len(ids, 3)) // the two identities created, the admin one used to call these access functions
 	// make sure both names are seen
 	returnedNames := make(map[string]bool)
 	for _, id := range ids {

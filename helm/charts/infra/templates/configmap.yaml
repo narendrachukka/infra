@@ -1,4 +1,4 @@
-{{- if include "server.enabled" . | eq "true" }}
+{{- if .Values.server.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -49,14 +49,6 @@ data:
 {{- $adminAccessKey = "env:ADMIN_ACCESS_KEY" }}
 {{- end }}
 {{- $identities = append $identities (dict "name" "admin" "accessKey" $adminAccessKey) }}
-{{- end }}
-
-{{- if include "connector.enabled" . | eq "true" }}
-{{- $accessKey := default "" .Values.connector.config.accessKey -}}
-{{- if or (not $accessKey) (and (not (hasPrefix "file:" $accessKey)) (not (hasPrefix "env:" $accessKey))) }}
-{{- $accessKey = "env:CONNECTOR_ACCESS_KEY" }}
-{{- end }}
-{{- $identities = append $identities (dict "name" "connector" "accessKey" $accessKey) }}
 {{- end }}
 
 {{- $identities | uniq | toYaml | nindent 6 }}

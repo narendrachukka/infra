@@ -193,9 +193,6 @@ func TestAPI_ListGrants(t *testing.T) {
 				req.Header.Set("Authorization", "Bearer "+adminAccessKey(srv))
 			},
 			expected: func(t *testing.T, resp *httptest.ResponseRecorder) {
-				connector, err := data.GetIdentity(srv.db, data.ByName("connector"))
-				assert.NilError(t, err)
-
 				assert.Equal(t, resp.Code, http.StatusOK, resp.Body.String())
 				var grants api.ListResponse[api.Grant]
 				err = json.NewDecoder(resp.Body).Decode(&grants)
@@ -205,11 +202,6 @@ func TestAPI_ListGrants(t *testing.T) {
 					{
 						Identity:  admin.ID,
 						Privilege: "admin",
-						Resource:  "infra",
-					},
-					{
-						Identity:  connector.ID,
-						Privilege: "connector",
 						Resource:  "infra",
 					},
 					{

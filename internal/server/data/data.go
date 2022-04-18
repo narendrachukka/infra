@@ -198,25 +198,7 @@ func InfraProvider(db *gorm.DB) *models.Provider {
 	return infraProviderCache
 }
 
-var infraConnectorCache *models.Identity
-
-// InfraConnectorIdentity is a lazy-loaded reference to the connector identity
-func InfraConnectorIdentity(db *gorm.DB) *models.Identity {
-	if infraConnectorCache == nil {
-		connector, err := GetIdentity(db, ByName(models.InternalInfraConnectorIdentityName))
-		if err != nil {
-			logging.S.Panic(err)
-			return nil
-		}
-
-		infraConnectorCache = connector
-	}
-
-	return infraConnectorCache
-}
-
 // InvalidateCache is used to clear references to frequently used resources
 func InvalidateCache() {
 	infraProviderCache = nil
-	infraConnectorCache = nil
 }

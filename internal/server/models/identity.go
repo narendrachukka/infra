@@ -7,11 +7,6 @@ import (
 	"github.com/infrahq/infra/uid"
 )
 
-const (
-	InternalInfraAdminIdentityName     = "admin"
-	InternalInfraConnectorIdentityName = "connector"
-)
-
 type Identity struct {
 	Model
 

@@ -5,15 +5,13 @@ If you have found a security vulnerability please disclose it privately to us by
 
 ## General Security
 ### HTTPS
-By default Infra and Infra connector communicate via encrypted HTTPS connections with validated certificates.
+Infra communicates over HTTPS by default. By default, Infra uses self-signed TLS certificates. By setting a DNS record to point at Infra server, valid TLS certificates will be generated via LetsEncrypt.
 
 ### Authentication
 When users login to Infra as a valid user they are issued a session token with a 24 character secret that is randomly generated. The SHA256 hash of this token is stored server-side for token validation. This session token is stored locally under `~/.infra`.
 
-When a user connects to a cluster after login, Infra issues a new JWT signed with an ECDSA signature using P-521 and SHA-512. This JWT is verified by the connector. If JWT and the user role is valid at the destination, the user is granted access.
-
 ## Deployment
-When deploying Infra, we recommend Infra be deployed in its own namespace to minimize the deployment scope. 
+When deploying Infra, we recommend Infra be deployed in its own namespace to minimize the deployment scope.
 
 ## Sensitive Information
 

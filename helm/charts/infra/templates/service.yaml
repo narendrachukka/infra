@@ -1,4 +1,4 @@
-{{- if include "server.enabled" . | eq "true" }}
+{{- .Values.server.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

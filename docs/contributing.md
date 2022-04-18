@@ -66,27 +66,6 @@ server:
     enable-telemetry: false
 ```
 
-* Enable in-cluster connector
-
-> Note: enabling in-cluster connector disables first-time user signup and requires an admin user to be created by Helm
-
-```yaml
----
-# example infra.yaml
-server:
-  additionalIdentities:
-    - name: admin
-      password: PASSWORD
-
-  additionalGrants:
-    - user: admin
-      role: admin
-      resource: infra
-
-connector:
-  enabled: true
-```
-
 See [Helm Chart reference](./reference/helm-chart.md) for a complete list of options configurable through Helm.
 
 ```bash

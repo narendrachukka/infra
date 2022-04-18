@@ -27,7 +27,7 @@ func ListGrants(c *gin.Context, subject uid.PolymorphicID, resource string, priv
 		data.ByOptionalPrivilege(privilege),
 	}
 
-	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraViewRole, models.InfraConnectorRole)
+	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraViewRole)
 	if err == nil {
 		selectors = append(selectors, data.ByOptionalSubject(subject))
 		return data.ListGrants(db, selectors...)

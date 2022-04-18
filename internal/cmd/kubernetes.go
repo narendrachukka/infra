@@ -117,22 +117,22 @@ func writeKubeconfig(identity *api.Identity, destinations []api.Destination, gra
 
 		var (
 			url, ca string
-			exists  bool
 		)
 
+		var destination string
 		for _, d := range destinations {
 			// eg resource:  "foo.bar"
 			// eg dest name: "foo"
 			if strings.HasPrefix(g.Resource, d.Name) {
 				url = d.Connection.URL
 				ca = d.Connection.CA
-				exists = true
+				destination = d.Name
 
 				break
 			}
 		}
 
-		if !exists {
+		if destination == "" {
 			continue
 		}
 
@@ -179,7 +179,7 @@ func writeKubeconfig(identity *api.Identity, destinations []api.Destination, gra
 		kubeConfig.AuthInfos[identity.Name] = &clientcmdapi.AuthInfo{
 			Exec: &clientcmdapi.ExecConfig{
 				Command:         executable,
-				Args:            []string{"tokens", "add"},
+				Args:            []string{"tokens", "add", destination},
 				APIVersion:      "client.authentication.k8s.io/v1beta1",
 				InteractiveMode: clientcmdapi.IfAvailableExecInteractiveMode,
 			},

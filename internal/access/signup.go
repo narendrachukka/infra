@@ -20,7 +20,7 @@ func SignupEnabled(c *gin.Context) (bool, error) {
 	db := getDB(c)
 
 	// use Unscoped because deleting identities, providers or grants should not re-enable signup
-	identities, err := data.Count[models.Identity](db.Unscoped(), data.NotName(models.InternalInfraConnectorIdentityName))
+	identities, err := data.Count[models.Identity](db.Unscoped())
 	if err != nil {
 		return false, err
 	}
@@ -30,7 +30,7 @@ func SignupEnabled(c *gin.Context) (bool, error) {
 		return false, err
 	}
 
-	grants, err := data.Count[models.Grant](db.Unscoped(), data.NotPrivilege(models.InfraConnectorRole))
+	grants, err := data.Count[models.Grant](db.Unscoped())
 	if err != nil {
 		return false, err
 	}

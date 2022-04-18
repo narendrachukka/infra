@@ -114,30 +114,6 @@ kubectl get ingress infra-server -o jsonpath="{.status.loadBalancer.ingress[*]['
 infra login <INFRA_API_SERVER>
 ```
 
-## Add Kubernetes Connectors
-
-### Step 1: Create an Access Key
-
-In order to add connectors to Infra, you will need to generate an access key. If you already have an access key, proceed to step 2.
-
-> Using the Infra admin access key is _not_ recommended as it provides more privileges than is necessary for a connector and may pose a security risk.
-
-```bash
-infra keys add <keyName> connector
-```
-
-### Step 2: Install Infra Connector
-
-Now that you have an access key, install Infra into your Kubernetes cluster.
-
-```bash
-helm upgrade --install infra-connector infrahq/infra --set connector.config.name=<clusterName> --set connector.config.server=<serverAddress> --set connector.config.accessKey=<accessKey>
-```
-
-> If the connector will live in the same cluster and namespace as the server, you can set `connector.config.server=localhost`.
-
-> You may also need to set `connector.config.skipTLSVerify=true` if the server is using a self-signed certificate.
-
 ## Upgrade Infra
 
 See [Upgrading Infra](./upgrading.md)

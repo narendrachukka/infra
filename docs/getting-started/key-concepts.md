@@ -31,7 +31,7 @@ Connectors are responsible for authenticating and provisioning user access in de
 
 ### Putting it all together
 
-Infra works by connecting identities to specific destinations via _connectors_. Users log in via the Infra CLI, configure access, and finally install connectors. Once set up, anyone on the team can run `infra login` to get access to the infrastructure they need:
+Infra works by connecting identities to specific destinations via _connectors_. Users log in via the Infra CLI, configure access, and then receive tokens to get access. Once set up, anyone on the team can run `infra login` to get access to the infrastructure they need:
 
 <br />
 

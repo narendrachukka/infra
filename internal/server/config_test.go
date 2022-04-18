@@ -297,7 +297,7 @@ func TestLoadConfigEmpty(t *testing.T) {
 
 	err = s.db.Model(&models.Grant{}).Count(&grants).Error
 	assert.NilError(t, err)
-	assert.Equal(t, int64(1), grants)
+	assert.Equal(t, int64(0), grants)
 }
 
 func TestLoadConfigInvalid(t *testing.T) {
@@ -479,11 +479,11 @@ func TestLoadConfigPruneConfig(t *testing.T) {
 
 	err = s.db.Model(&models.Grant{}).Count(&grants).Error
 	assert.NilError(t, err)
-	assert.Equal(t, int64(3), grants) // 2 from config, 1 internal connector
+	assert.Equal(t, int64(2), grants) // 2 from config
 
 	identities, err := data.ListIdentities(s.db)
 	assert.NilError(t, err)
-	assert.Equal(t, 2, len(identities))
+	assert.Equal(t, 1, len(identities))
 
 	err = s.db.Model(&models.Group{}).Count(&groups).Error
 	assert.NilError(t, err)
@@ -514,11 +514,11 @@ func TestLoadConfigPruneConfig(t *testing.T) {
 
 	err = s.db.Model(&models.Grant{}).Count(&grants).Error
 	assert.NilError(t, err)
-	assert.Equal(t, int64(1), grants) // connector
+	assert.Equal(t, int64(0), grants)
 
 	identities, err = data.ListIdentities(s.db)
 	assert.NilError(t, err)
-	assert.Equal(t, 1, len(identities))
+	assert.Equal(t, 0, len(identities))
 
 	err = s.db.Model(&models.Group{}).Count(&groups).Error
 	assert.NilError(t, err)
@@ -579,12 +579,11 @@ func TestLoadConfigUpdate(t *testing.T) {
 	grants := make([]models.Grant, 0)
 	err = s.db.Find(&grants).Error
 	assert.NilError(t, err)
-	assert.Assert(t, is.Len(grants, 3)) // 2 from config, 1 internal connector
+	assert.Assert(t, is.Len(grants, 2)) // 2 from config
 
 	privileges := map[string]int{
-		"admin":     0,
-		"view":      0,
-		"connector": 0,
+		"admin": 0,
+		"view":  0,
 	}
 
 	for _, v := range grants {
@@ -593,11 +592,10 @@ func TestLoadConfigUpdate(t *testing.T) {
 
 	assert.Equal(t, privileges["admin"], 2)
 	assert.Equal(t, privileges["view"], 0)
-	assert.Equal(t, privileges["connector"], 1)
 
 	identities, err := data.ListIdentities(s.db)
 	assert.NilError(t, err)
-	assert.Equal(t, 6, len(identities)) // john@example.com, sarah@example.com, test@example.com, connector, r2d2, c3po
+	assert.Assert(t, is.Len(identities, 5)) // john@example.com, sarah@example.com, test@example.com, r2d2, c3po
 
 	err = s.db.Model(&models.Group{}).Count(&groups).Error
 	assert.NilError(t, err)
@@ -652,12 +650,11 @@ func TestLoadConfigUpdate(t *testing.T) {
 	grants = make([]models.Grant, 0)
 	err = s.db.Find(&grants).Error
 	assert.NilError(t, err)
-	assert.Assert(t, is.Len(grants, 3))
+	assert.Assert(t, is.Len(grants, 2))
 
 	privileges = map[string]int{
-		"admin":     0,
-		"view":      0,
-		"connector": 0,
+		"admin": 0,
+		"view":  0,
 	}
 
 	for _, v := range grants {
@@ -666,11 +663,10 @@ func TestLoadConfigUpdate(t *testing.T) {
 
 	assert.Equal(t, privileges["admin"], 0)
 	assert.Equal(t, privileges["view"], 2)
-	assert.Equal(t, privileges["connector"], 1)
 
 	identities, err = data.ListIdentities(s.db)
 	assert.NilError(t, err)
-	assert.Equal(t, 2, len(identities))
+	assert.Assert(t, is.Len(identities, 1))
 
 	var user models.Identity
 	err = s.db.Where("name = ?", "test@example.com").First(&user).Error

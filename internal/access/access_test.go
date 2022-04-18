@@ -58,10 +58,6 @@ func setupAccessTestContext(t *testing.T) (*gin.Context, *gorm.DB, *models.Provi
 	err = data.CreateProvider(db, provider)
 	assert.NilError(t, err)
 
-	identity := &models.Identity{Name: models.InternalInfraConnectorIdentityName}
-	err = data.CreateIdentity(db, identity)
-	assert.NilError(t, err)
-
 	return c, db, provider
 }
 
@@ -180,7 +176,7 @@ func TestInfraRequireInfraRole(t *testing.T) {
 	t.Run("does not have required role in list", func(t *testing.T) {
 		c := setup(t, models.InfraViewRole)
 
-		authDB, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraConnectorRole)
+		authDB, err := RequireInfraRole(c, models.InfraAdminRole)
 		assert.Error(t, err, "forbidden: requestor does not have required grant")
 		assert.Assert(t, authDB == nil)
 	})

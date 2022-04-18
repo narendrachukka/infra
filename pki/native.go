@@ -238,7 +238,6 @@ func (n *NativeCertificateProvider) SignCertificate(csr x509.CertificateRequest)
 	switch {
 	case csr.Subject.CommonName == rootCAName:
 		return nil, fmt.Errorf("cannot sign cert pretending to be the root CA")
-	case strings.HasPrefix(csr.Subject.CommonName, "Connector"):
 	case strings.HasPrefix(csr.Subject.CommonName, "Infra Server"):
 	case strings.HasPrefix(csr.Subject.CommonName, "User"):
 		// these are ok.

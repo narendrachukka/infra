@@ -21,7 +21,6 @@ import (
 	"github.com/infrahq/infra/api"
 	"github.com/infrahq/infra/internal"
 	"github.com/infrahq/infra/internal/cmd/cliopts"
-	"github.com/infrahq/infra/internal/connector"
 	"github.com/infrahq/infra/internal/logging"
 )
 
@@ -190,51 +189,6 @@ func canonicalPath(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
-func newConnectorCmd() *cobra.Command {
-	var configFilename string
-
-	cmd := &cobra.Command{
-		Use:    "connector",
-		Short:  "Start the Infra connector",
-		Args:   NoArgs,
-		Hidden: true,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			logging.SetServerLogger()
-
-			options := defaultConnectorOptions()
-			err := cliopts.Load(&options, cliopts.Options{
-				Filename:  configFilename,
-				EnvPrefix: "INFRA_CONNECTOR",
-				Flags:     cmd.Flags(),
-			})
-			if err != nil {
-				return err
-			}
-
-			return runConnector(cmd.Context(), options)
-		},
-	}
-
-	cmd.Flags().StringVarP(&configFilename, "config-file", "f", "", "Connector config file")
-	cmd.Flags().StringP("server", "s", "", "Infra server hostname")
-	cmd.Flags().StringP("access-key", "a", "", "Infra access key (use file:// to load from a file)")
-	cmd.Flags().StringP("name", "n", "", "Destination name")
-	cmd.Flags().String("ca-cert", "", "Path to CA certificate file")
-	cmd.Flags().String("ca-key", "", "Path to CA key file")
-	cmd.Flags().Bool("skip-tls-verify", false, "Skip verifying server TLS certificates")
-
-	return cmd
-}
-
-// runConnector is a shim for testing
-var runConnector = connector.Run
-
-// defaultConnectorOptions is empty for now. It exists so that it can be
-// referenced by a test.
-func defaultConnectorOptions() connector.Options {
-	return connector.Options{}
-}
-
 func NewRootCmd(cli *CLI) *cobra.Command {
 	cobra.EnableCommandSorting = false
 
@@ -271,7 +225,6 @@ func NewRootCmd(cli *CLI) *cobra.Command {
 	// Hidden
 	rootCmd.AddCommand(newTokensCmd(cli))
 	rootCmd.AddCommand(newServerCmd())
-	rootCmd.AddCommand(newConnectorCmd())
 
 	rootCmd.PersistentFlags().String("log-level", "info", "Show logs when running the command [error, warn, info, debug]")
 	rootCmd.PersistentFlags().Bool("help", false, "Display help")

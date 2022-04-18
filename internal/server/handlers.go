@@ -14,6 +14,7 @@ import (
 	"github.com/infrahq/infra/api"
 	"github.com/infrahq/infra/internal"
 	"github.com/infrahq/infra/internal/access"
+	"github.com/infrahq/infra/internal/connector"
 	"github.com/infrahq/infra/internal/logging"
 	"github.com/infrahq/infra/internal/server/authn"
 	"github.com/infrahq/infra/internal/server/models"
@@ -277,11 +278,14 @@ func (a *API) GetDestination(c *gin.Context, r *api.Resource) (*api.Destination,
 }
 
 func (a *API) CreateDestination(c *gin.Context, r *api.CreateDestinationRequest) (*api.Destination, error) {
+	// todo: validate the credentials with the upstream destination
+	fmt.Println(r.Token)
+
 	destination := &models.Destination{
-		Name:          r.Name,
-		UniqueID:      r.UniqueID,
-		ConnectionURL: r.Connection.URL,
-		ConnectionCA:  r.Connection.CA,
+		Name:  r.Name,
+		URL:   r.Connection.URL,
+		CA:    r.Connection.CA,
+		Token: models.EncryptedAtRest(r.Token),
 	}
 
 	err := access.CreateDestination(c, destination)
@@ -297,10 +301,10 @@ func (a *API) UpdateDestination(c *gin.Context, r *api.UpdateDestinationRequest)
 		Model: models.Model{
 			ID: r.ID,
 		},
-		Name:          r.Name,
-		UniqueID:      r.UniqueID,
-		ConnectionURL: r.Connection.URL,
-		ConnectionCA:  r.Connection.CA,
+		Name:  r.Name,
+		URL:   r.Connection.URL,
+		CA:    r.Connection.CA,
+		Token: models.EncryptedAtRest(r.Token),
 	}
 
 	if err := access.SaveDestination(c, destination); err != nil {
@@ -311,25 +315,60 @@ func (a *API) UpdateDestination(c *gin.Context, r *api.UpdateDestinationRequest)
 }
 
 func (a *API) DeleteDestination(c *gin.Context, r *api.Resource) error {
+	// todo: clean up the upstream destination
 	return access.DeleteDestination(c, r.ID)
 }
 
-func (a *API) CreateToken(c *gin.Context, r *api.EmptyRequest) (*api.CreateTokenResponse, error) {
+func (a *API) CreateToken(c *gin.Context, r *api.CreateTokenRequest) (*api.CreateTokenResponse, error) {
 	if access.AuthenticatedIdentity(c) != nil {
 		err := a.UpdateIdentityInfoFromProvider(c)
 		if err != nil {
 			return nil, fmt.Errorf("%w: update ident info from provider: %s", internal.ErrForbidden, err)
 		}
+	}
 
-		token, err := access.CreateToken(c)
+	destination, err := access.GetDestination(c, r.Destination)
+	if err != nil {
+		return nil, err
+	}
+
+	conn := connector.NewKubernetesConnector(destination.URL, destination.CA, string(destination.Token))
+
+	// get current user
+	user := access.AuthenticatedIdentity(c)
+	if user == nil {
+		return nil, internal.ErrUnauthorized
+	}
+
+	// create user
+	err = conn.CreateUser(user.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// create grants
+	grants, err := access.ListGrants(c, user.PolyID(), destination.Name, "")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, g := range grants {
+		err := conn.Grant(user.Name, g.Privilege)
 		if err != nil {
 			return nil, err
 		}
-
-		return &api.CreateTokenResponse{Token: token.Token, Expires: api.Time(token.Expires)}, nil
 	}
 
-	return nil, fmt.Errorf("no identity found in access key: %w", internal.ErrUnauthorized)
+	token, err := conn.CreateToken(user.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.CreateTokenResponse{
+		// todo: expiry
+		Expires: api.Time(time.Now().Add(24 * time.Hour)),
+		Token:   token,
+	}, nil
 }
 
 func (a *API) ListAccessKeys(c *gin.Context, r *api.ListAccessKeysRequest) (*api.ListResponse[api.AccessKey], error) {

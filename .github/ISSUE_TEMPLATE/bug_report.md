@@ -38,8 +38,7 @@ $ kubectl version
 ## Relevant Infra Logs
 
 <!--
-Use `kubectl logs deployment/infra-server` and `kubectl logs deployment/infra-connector` and
-add any suspicious logs here. Try to keep snippets short and concise.
+Use `kubectl logs deployment/infra-server` and add any suspicious logs here. Try to keep snippets short and concise.
 
 Sensitive information should be masked/redacted.
 -->

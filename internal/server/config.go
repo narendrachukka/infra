@@ -534,16 +534,6 @@ func (s Server) loadConfig(config Config) error {
 			Name: models.InternalInfraProviderName,
 		})
 
-		config.Identities = append(config.Identities, Identity{
-			Name: models.InternalInfraConnectorIdentityName,
-		})
-
-		config.Grants = append(config.Grants, Grant{
-			User:     models.InternalInfraConnectorIdentityName,
-			Role:     models.InfraConnectorRole,
-			Resource: "infra",
-		})
-
 		if err := s.loadProviders(tx, config.Providers); err != nil {
 			return fmt.Errorf("load providers: %w", err)
 		}

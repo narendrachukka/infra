@@ -133,11 +133,10 @@ func TestAPI_ListIdentities(t *testing.T) {
 				err := json.NewDecoder(resp.Body).Decode(&actual)
 				assert.NilError(t, err)
 				expected := api.ListResponse[api.Identity]{
-					Count: 6,
+					Count: 5,
 					Items: []api.Identity{
 						{Name: "HAL"},
 						{Name: "admin"},
-						{Name: "connector"},
 						{Name: "me@example.com"},
 						{Name: "other-HAL"},
 						{Name: "other@example.com"},
@@ -472,24 +471,6 @@ func TestDeleteIdentity(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, resp.Code, resp.Body.String())
 }
 
-func TestDeleteIdentity_NoDeleteInternalIdentities(t *testing.T) {
-	s := setupServer(t, withAdminIdentity)
-
-	routes := s.GenerateRoutes(prometheus.NewRegistry())
-	connector := data.InfraConnectorIdentity(s.db)
-
-	route := fmt.Sprintf("/v1/identities/%s", connector.ID)
-	req, err := http.NewRequest(http.MethodDelete, route, nil)
-	assert.NilError(t, err)
-
-	req.Header.Add("Authorization", "Bearer "+adminAccessKey(s))
-
-	resp := httptest.NewRecorder()
-	routes.ServeHTTP(resp, req)
-
-	assert.Equal(t, http.StatusForbidden, resp.Code, resp.Body.String())
-}
-
 func TestDeleteIdentity_NoDeleteSelf(t *testing.T) {
 	s := setupServer(t)
 
@@ -817,7 +798,9 @@ func TestAPI_CreateAccessKey(t *testing.T) {
 	srv := setupServer(t, withAdminIdentity)
 	routes := srv.GenerateRoutes(prometheus.NewRegistry())
 
-	connector := data.InfraConnectorIdentity(srv.db)
+	users, err := data.ListIdentities(srv.db)
+	assert.NilError(t, err)
+	assert.Assert(t, len(users) > 0)
 
 	run := func(body api.CreateAccessKeyRequest) *api.CreateAccessKeyResponse {
 		var buf bytes.Buffer
@@ -842,18 +825,18 @@ func TestAPI_CreateAccessKey(t *testing.T) {
 
 	t.Run("AutomaticName", func(t *testing.T) {
 		req := api.CreateAccessKeyRequest{
-			IdentityID:        connector.ID,
+			IdentityID:        users[0].ID,
 			TTL:               api.Duration(time.Minute),
 			ExtensionDeadline: api.Duration(time.Minute),
 		}
 
 		resp := run(req)
-		assert.Assert(t, strings.HasPrefix(resp.Name, "connector-"))
+		assert.Assert(t, strings.HasPrefix(resp.Name, users[0].Name+"-"))
 	})
 
 	t.Run("UserProvidedName", func(t *testing.T) {
 		req := api.CreateAccessKeyRequest{
-			IdentityID:        connector.ID,
+			IdentityID:        users[0].ID,
 			Name:              "mysupersecretaccesskey",
 			TTL:               api.Duration(time.Minute),
 			ExtensionDeadline: api.Duration(time.Minute),

@@ -34,7 +34,7 @@ func AuthenticatedIdentity(c *gin.Context) *models.Identity {
 }
 
 func GetIdentity(c *gin.Context, id uid.ID) (*models.Identity, error) {
-	db, err := hasAuthorization(c, id, isIdentitySelf, models.InfraAdminRole, models.InfraViewRole, models.InfraConnectorRole)
+	db, err := hasAuthorization(c, id, isIdentitySelf, models.InfraAdminRole, models.InfraViewRole)
 	if err != nil {
 		return nil, err
 	}
@@ -51,10 +51,6 @@ func CreateIdentity(c *gin.Context, identity *models.Identity) error {
 	return data.CreateIdentity(db, identity)
 }
 
-func InfraConnectorIdentity(c *gin.Context) *models.Identity {
-	return data.InfraConnectorIdentity(getDB(c))
-}
-
 func DeleteIdentity(c *gin.Context, id uid.ID) error {
 	self, err := isIdentitySelf(c, id)
 	if err != nil {
@@ -63,10 +59,6 @@ func DeleteIdentity(c *gin.Context, id uid.ID) error {
 
 	if self {
 		return fmt.Errorf("cannot delete self: %w", internal.ErrForbidden)
-	}
-
-	if InfraConnectorIdentity(c).ID == id {
-		return internal.ErrForbidden
 	}
 
 	db, err := RequireInfraRole(c, models.InfraAdminRole)
@@ -100,7 +92,7 @@ func DeleteIdentity(c *gin.Context, id uid.ID) error {
 }
 
 func ListIdentities(c *gin.Context, name string, ids []uid.ID) ([]models.Identity, error) {
-	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraViewRole, models.InfraConnectorRole)
+	db, err := RequireInfraRole(c, models.InfraAdminRole, models.InfraViewRole)
 	if err != nil {
 		return nil, err
 	}

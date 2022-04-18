@@ -4,18 +4,18 @@ import (
 	"github.com/infrahq/infra/uid"
 )
 
-type Destination struct {
-	ID         uid.ID                `json:"id"`
-	UniqueID   string                `json:"uniqueID" form:"uniqueID" example:"94c2c570a20311180ec325fd56"`
-	Name       string                `json:"name" form:"name"`
-	Created    Time                  `json:"created"`
-	Updated    Time                  `json:"updated"`
-	Connection DestinationConnection `json:"connection"`
-}
-
 type DestinationConnection struct {
 	URL string `json:"url" validate:"required" example:"aa60eexample.us-west-2.elb.amazonaws.com"`
 	CA  string `json:"ca" example:"-----BEGIN CERTIFICATE-----\nMIIDNTCCAh2gAwIBAgIRALRetnpcTo9O3V2fAK3ix+c\n-----END CERTIFICATE-----\n"`
+}
+
+type Destination struct {
+	ID      uid.ID `json:"id"`
+	Name    string `json:"name" form:"name"`
+	Created Time   `json:"created"`
+	Updated Time   `json:"updated"`
+
+	Connection DestinationConnection `json:"connection"`
 }
 
 type ListDestinationsRequest struct {
@@ -24,9 +24,9 @@ type ListDestinationsRequest struct {
 }
 
 type CreateDestinationRequest struct {
-	UniqueID   string                `json:"uniqueID"`
 	Name       string                `json:"name" validate:"required"`
 	Connection DestinationConnection `json:"connection"`
+	Token      string                `json:"token"`
 }
 
 type UpdateDestinationRequest struct {
@@ -34,4 +34,5 @@ type UpdateDestinationRequest struct {
 	Name       string                `json:"name" validate:"required"`
 	UniqueID   string                `json:"uniqueID"`
 	Connection DestinationConnection `json:"connection"`
+	Token      string                `json:"token"`
 }

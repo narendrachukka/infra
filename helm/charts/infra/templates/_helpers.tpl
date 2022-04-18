@@ -152,14 +152,6 @@ Server 'env' values. Merges global and local values.
 {{- $env = append $env (dict "name" "ADMIN_ACCESS_KEY" "valueFrom" (dict "secretKeyRef" (dict "name" (printf "%s-admin-access-key" .Release.Name) "key" "access-key"))) }}
 {{- end }}
 {{- end }}
-
-{{- if include "connector.enabled" . | eq "true" -}}
-{{- $accessKey := default "" .Values.connector.config.accessKey -}}
-{{- if or (not $accessKey) (and (not (hasPrefix "file:" $accessKey)) (not (hasPrefix "env:" $accessKey))) }}
-{{- $env = append $env (dict "name" "CONNECTOR_ACCESS_KEY" "valueFrom" (dict "secretKeyRef" (dict "name" (printf "%s-access-key" .Release.Name) "key" "access-key"))) }}
-{{- end }}
-{{- end }}
-
 {{- concat $env | uniq | toYaml }}
 {{- end }}
 
@@ -168,11 +160,4 @@ Server 'envFrom' values. Merges global and local values.
 */}}
 {{- define "server.envFrom" -}}
 {{- concat .Values.server.envFrom .Values.global.envFrom | uniq | toYaml }}
-{{- end }}
-
-{{/*
-Infer whether Server should be deployed based on server.enabled and connector.config.server.
-*/}}
-{{- define "server.enabled" -}}
-{{- and .Values.server.enabled (not .Values.connector.config.server) }}
 {{- end }}

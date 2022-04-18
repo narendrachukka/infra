@@ -1,10 +1,6 @@
 # Quickstart
 
-In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
-* Install Infra CLI
-* Deploy Infra
-* Connect a Kubernetes cluster
-* Create a user and grant them view (read-only) access to the cluster
+In this quickstart we'll get up and running using Infra to manage access to Kubernetes.
 
 ### Prerequisites
 
@@ -13,6 +9,8 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 * A Kubernetes cluster. For local testing we recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ### 1. Install Infra CLI
+
+First, install `infra`:
 
 <details>
   <summary><strong>macOS</strong></summary>
@@ -53,10 +51,9 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
   ```
 </details>
 
+### 2. Run the infra server
 
-### 2. Deploy Infra
-
-Deploy an Infra to your Kubernetes cluster via `helm`:
+We'll deploy the Infra server locally:
 
 ```
 helm repo add infrahq https://helm.infrahq.com/
@@ -64,89 +61,68 @@ helm repo update
 helm install infra infrahq/infra
 ```
 
-Next, find the hostname for Infra server you just deployed:
+### 3. Log in
+
+Once the Infra server is running, login to the server to complete the setup.
 
 ```
-kubectl get service infra-server -o jsonpath="{.status.loadBalancer.ingress[*]['ip', 'hostname']}" -w
+infra login localhost --skip-tls-verify
 ```
 
-> Note: It may take a few minutes for the LoadBalancer to be provisioned for the Infra server
+### 4. Connect your first cluster
 
-Login to the Infra server using the hostname above and follow the prompt to create your admin account:
-
-```
-infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
-```
-
-
-### 3. Connect your first Kubernetes cluster
-
-Generate an access key named `key` to connect Kubernetes clusters:
+Next, we'll connect a Kubernetes cluster. We recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once your cluster is running locally (make sure Kubernetes is enabled), you can add a cluster via `infra destinations add`:
 
 ```
-infra keys add connector
+# switch to the kubernetes context for the cluster you want to add
+kubectl config use-context docker-desktop
+
+# add the cluster to infra
+infra destinations add docker-desktop
 ```
 
-Next, use this access key to connect your first cluster via `helm`. **Note:** this can be the same cluster used to install Infra in step 2.
-
-Prepare your values:
-
-* `connector.config.name`: choose a name for this cluster
-* `connector.config.server`: the same hostname used for `infra login`
-* `connector.config.accessKey`: the key created above via `infra keys add`
-
-Install the Infra connector via `helm`:
+Your cluster will be added. To verify it's connected:
 
 ```
-helm upgrade --install infra-connector infrahq/infra \
-  --set connector.config.name=example-cluster \
-  --set connector.config.server=<INFRA_SERVER_HOSTNAME> \
-  --set connector.config.accessKey=<ACCESS_KEY> \
-  --set connector.config.skipTLSVerify=true
+infra destinations list
 ```
 
-| Note: it may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
+### 4. Set up your first user with view access to the cluster
 
-### 4. Add a user and grant access to the cluster
-
-Next, add a user:
+Now that the Infra server is setup you can create a user.  The `infra id add` command creates a one-time password for the user.
 
 ```
-infra id add user@example.com
+infra id add name@example.com
 ```
 
-| Note: Infra will provide you a one-time password. Please note this password for step 5.
-
-Grant this user read-only access to the Kubernetes cluster you just connected to Infra:
+Grant the user view (read-only) privileges.
 
 ```
-infra grants add user@example.com example-cluster --role view
+infra grants add name@example.com kubernetes.docker-desktop --role view
 ```
 
-### 5. Login as the example user and access the cluster:
+### 5. Log in
 
-Use the one-time password in the previous step to log in as the user. You'll be prompted to change the user's password since it's this new user's first time logging in.
-
-```
-infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
-```
-
-Next, view this user's cluster access. You should see the user has `view` access to the `example-cluster` cluster connected above:
+Now, log in as the new user
 
 ```
-infra list
+infra login localhost
 ```
 
-Lastly, switch to this Kubernetes cluster and verify the user's access:
+Switch to our desktop cluster
 
 ```
-infra use example-cluster
+infra use docker-desktop
+```
 
-# Works since the user has view access
-kubectl get pods -A
+Finally, access resources in your cluster:
 
-# Does not work
-kubectl create namespace test-namespace
+```
+# works
+kubectl get pods
+
+# does not work
+kubectl create namespace test
 ```
 
 Congratulations, you've:

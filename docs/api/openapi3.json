@@ -113,10 +113,6 @@
           "name": {
             "type": "string"
           },
-          "uniqueID": {
-            "example": "94c2c570a20311180ec325fd56",
-            "type": "string"
-          },
           "updated": {
             "description": "formatted as an RFC3339 date-time",
             "example": "2022-03-14T09:48:00Z",
@@ -358,10 +354,6 @@
                   "type": "string"
                 },
                 "name": {
-                  "type": "string"
-                },
-                "uniqueID": {
-                  "example": "94c2c570a20311180ec325fd56",
                   "type": "string"
                 },
                 "updated": {
@@ -1059,7 +1051,7 @@
                   "name": {
                     "type": "string"
                   },
-                  "uniqueID": {
+                  "token": {
                     "type": "string"
                   }
                 },
@@ -1347,6 +1339,9 @@
                     "type": "object"
                   },
                   "name": {
+                    "type": "string"
+                  },
+                  "token": {
                     "type": "string"
                   },
                   "uniqueID": {
@@ -3630,6 +3625,26 @@
       "post": {
         "description": "CreateToken",
         "operationId": "CreateToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "destination": {
+                    "example": "4yJ3n3D8E2",
+                    "format": "uid",
+                    "pattern": "[\\da-zA-HJ-NP-Z]{1,11}",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "destination"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "400": {
             "content": {

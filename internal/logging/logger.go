@@ -44,7 +44,7 @@ func newLogger(level zapcore.LevelEnabler, stderr zapcore.WriteSyncer) *zap.Logg
 }
 
 // SetServerLogger changes L and S to a logger that is appropriate for long
-// running processes like the api server and connectors. The logger uses
+// running processes like the api server. The logger uses
 // json format and includes the function name and line number in the log message.
 //
 // SetServerLogger should not be called concurrently. It should be called

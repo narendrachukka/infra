@@ -28,38 +28,6 @@ You can also download the [latest Infra release][1] directly from the repository
     infra version
     ```
 
-## Upgrading Infra Kubernetes Connector
-
-1. Update the Helm repository
-
-    ```bash
-    helm repo update infrahq
-    ```
-
-2. Upgrade Infra. If using Helm values files, ensure those are passed into the upgrade command.
-
-    ```bash
-    helm upgrade -f values.yaml infra-connector infrahq/infra
-    ```
-
-    If using output from `infra destinations add`, ensure the same arguments are being passed into the upgrade command.
-
-    ```bash
-    helm upgrade --set connector.config.name=... --set connector.config.accessKey=... --set connector.config.server=... infra-connector infrahq/infra
-    ```
-
-3. Wait for the pods to finish upgrade
-
-    ```bash
-    kubectl wait --for=condition=ready pod --selector app.kubernetes.io/name=infra-connector
-    ```
-
-4. Check Infra Kubernetes Connector version
-
-    ```bash
-    kubectl logs -l app.kubernetes.io/name=infra-connector | grep 'starting infra'
-    ```
-
 ## Upgrading Infra CLI
 
 ### macOS

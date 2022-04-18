@@ -13,9 +13,16 @@ import (
 
 func main() {
 	if err := cmd.Run(context.Background(), os.Args[1:]...); err != nil {
-		if !errors.Is(err, terminal.InterruptErr) {
-			logging.S.Error(err.Error())
+		var userErr cmd.UserFacingError
+		switch {
+		case errors.Is(err, terminal.InterruptErr):
+			os.Exit(1)
+		case errors.As(err, &userErr):
+			logging.S.Error(userErr.Error())
+			os.Exit(1)
+		default:
+			logging.S.Error("Unhandled error", err.Error())
+			os.Exit(1)
 		}
-		os.Exit(1)
 	}
 }

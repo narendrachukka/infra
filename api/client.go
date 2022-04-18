@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,38 +17,24 @@ type Client struct {
 }
 
 func checkError(status int, body []byte) error {
+	if status >= 200 && status < 300 {
+		return nil
+	}
+
 	var apiError Error
 
+	// TODO: check Content-Type header is correct before attempting unmarshal
 	err := json.Unmarshal(body, &apiError)
 	if err != nil {
 		apiError.Message = string(body)
 		apiError.Code = int32(status)
 	}
 
-	switch apiError.Code {
-	case http.StatusUnauthorized:
-		return ErrUnauthorized
-	case http.StatusForbidden:
-		return ErrForbidden
-	case http.StatusConflict:
-		return ErrDuplicate
-	case http.StatusNotFound:
-		return ErrNotFound
-	case http.StatusBadRequest:
-		return fmt.Errorf("%w: %s", ErrBadRequest, apiError.Message)
-	case http.StatusBadGateway:
-		// this errror should be displayed to the user so they can see its an external problem
-		return fmt.Errorf(apiError.Message)
-	case http.StatusInternalServerError:
-		return ErrInternal
-	case http.StatusGone:
-		return fmt.Errorf(apiError.Message)
-	}
-
 	if status >= 400 {
-		return errors.New(http.StatusText(status))
+		return apiError
 	}
 
+	// TODO: unhandled code 1xx or 3xx, what to do for those?
 	return nil
 }
 

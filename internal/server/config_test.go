@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gotest.tools/v3/assert"
 
-	"github.com/infrahq/infra/internal/decode"
+	"github.com/infrahq/infra/internal/cmd/cliopts"
 )
 
 func TestKeyProvider_PrepareForDecode_IntegrationWithDecode_FullConfig(t *testing.T) {
@@ -215,8 +215,8 @@ func decodeConfig(target interface{}, source interface{}) error {
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToSliceHookFunc(","),
-			decode.HookPrepareForDecode,
-			decode.HookSetFromString,
+			cliopts.HookPrepareForDecode,
+			cliopts.HookSetFromString,
 		),
 	}
 

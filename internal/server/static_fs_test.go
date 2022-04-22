@@ -1,68 +1,47 @@
 package server
 
 import (
+	"net/http"
 	"testing"
 
-	"github.com/spf13/afero"
+	"github.com/psanford/memfs"
 	"gotest.tools/v3/assert"
 )
 
-func TestStaticFileSystemOpensFile(t *testing.T) {
-	fs := afero.NewHttpFs(afero.NewMemMapFs())
-	_, err := fs.Create("ui/dashboard.html")
+func TestStaticFileSystem(t *testing.T) {
+	fs := memfs.New()
+	err := fs.MkdirAll("ui", 0755)
+	assert.NilError(t, err)
+	err = fs.WriteFile("ui/dashboard.html", nil, 0644)
 	assert.NilError(t, err)
 
 	sfs := &StaticFileSystem{
-		base: fs,
+		base: http.FS(fs),
 	}
 
-	f, err := sfs.Open("dashboard.html")
-	assert.NilError(t, err)
+	t.Run("open file with .html suffix", func(t *testing.T) {
+		f, err := sfs.Open("dashboard.html")
+		assert.NilError(t, err)
 
-	stat, err := f.Stat()
-	assert.NilError(t, err)
-	assert.Equal(t, stat.Name(), "dashboard.html")
-}
+		stat, err := f.Stat()
+		assert.NilError(t, err)
+		assert.Equal(t, stat.Name(), "dashboard.html")
+	})
 
-func TestStaticFileSystemAppendDotHtml(t *testing.T) {
-	fs := afero.NewHttpFs(afero.NewMemMapFs())
-	_, err := fs.Create("ui/dashboard.html")
-	assert.NilError(t, err)
+	t.Run("open file without suffix", func(t *testing.T) {
+		f, err := sfs.Open("dashboard")
+		assert.NilError(t, err)
 
-	sfs := &StaticFileSystem{
-		base: fs,
-	}
+		stat, err := f.Stat()
+		assert.NilError(t, err)
+		assert.Equal(t, stat.Name(), "dashboard.html")
+	})
 
-	f, err := sfs.Open("dashboard")
-	assert.NilError(t, err)
+	t.Run("file exists with .html suffix", func(t *testing.T) {
+		assert.Assert(t, sfs.Exists("/", "/dashboard.html"))
+	})
 
-	stat, err := f.Stat()
-	assert.NilError(t, err)
-	assert.Equal(t, stat.Name(), "dashboard.html")
-}
-
-func TestStaticFileSystemExists(t *testing.T) {
-	fs := afero.NewHttpFs(afero.NewMemMapFs())
-	_, err := fs.Create("ui/dashboard/foo")
-	assert.NilError(t, err)
-
-	sfs := &StaticFileSystem{
-		base: fs,
-	}
-
-	exists := sfs.Exists("/", "/dashboard")
-	assert.Equal(t, exists, true)
-}
-
-func TestStaticFileSystemExistsAppendDotHtml(t *testing.T) {
-	fs := afero.NewHttpFs(afero.NewMemMapFs())
-	_, err := fs.Create("ui/dashboard/foo.html")
-	assert.NilError(t, err)
-
-	sfs := &StaticFileSystem{
-		base: fs,
-	}
-
-	exists := sfs.Exists("/", "/dashboard/foo")
-	assert.Equal(t, exists, true)
+	t.Run("file exists without suffix", func(t *testing.T) {
+		assert.Assert(t, sfs.Exists("/", "/dashboard"))
+	})
 }

@@ -1,3 +1,7 @@
+---
+position: 2
+---
+
 # Install Infra on Kubernetes
 
 **Prerequisites:**

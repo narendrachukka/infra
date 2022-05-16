@@ -1,3 +1,7 @@
+---
+position: 1
+---
+
 # Install Infra CLI
 
 ## macOS

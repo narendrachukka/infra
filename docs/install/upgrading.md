@@ -1,3 +1,7 @@
+---
+position: 4
+---
+
 # Upgrading
 
 You can also download the [latest Infra release][1] directly from the repository.

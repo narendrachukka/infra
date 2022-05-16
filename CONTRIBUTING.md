@@ -1,39 +1,110 @@
-# Contributing
+---
+hidden: true
+---
 
-Thank you so much for wanting to help make Infra successful. Community contributions are really important and help
-us make Infra better.
+# Developing Infra
 
-## Types of Contributions
+## Setup
 
-### Report Bugs or Suggest Enhancements
+1. Install [Go 1.18](https://go.dev/dl/#go1.18)
+1. Clone the project
 
-We use [GitHub Issues](https://github.com/infrahq/infra/issues) to track bug reports and feature requests. We're always
-looking for ways to improve the project, and well written issues help us find things we may have missed. Before filing an issue though,
-please check to see if it has been filed before.
+    ```bash
+    git clone https://github.com/infrahq/infra
+    cd infra
+    ```
 
-When filing the issue, we ask that you use good bug/feature etiquette. Make sure that you:
- * Use a clear and descriptive title
- * Include a description of what you expected to happen
- * Attach a screenshot if relevant
- * Include the Infra and Kubernetes versions you're using
- * Describe where you're running Kubernetes
+## Run locally
 
+```bash
+go run .
+```
 
-### Fix a Bug or Implement a Feature
+## Run a full local setup
 
-If you'd like to help fix any bugs or contribute a new feature, please first make sure there is an [issue](https://github.com/infrahq/infra/issues) filed.
+### Setup
 
-Any issues tagged with `bug` or `good first issue` make great places to start. Issues tagged with `enhancement` are
-changes that we're thinking of making in the future. If you want to talk about an issue more, check out our [discussions page](https://github.com/infrahq/infra/discussions).
+* Install [Docker](https://docker.com/)
+  * (macOS, Windows) [Docker Desktop](https://www.docker.com/products/docker-desktop)
+  * (Linux) [Docker Engine](https://docs.docker.com/engine/install)
+* `envsubst`
+  * (macOS, Linux) `brew install gettext`
 
-Our repository follows GitHub's normal forking model. If you have never forked a repository before, follow GitHub's
-documentation which describes how to:
-  * [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-  * [Contribute to projects](https://docs.github.com/en/get-started/quickstart/contributing-to-projects)
+---
 
-When you are ready to commit your change, follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-for your commit message. The type must be one of `fix`, `feat`, `improve`, or `maintain`. These types are
-documented in the [commitlint config file](.github/commitlint.config.js).
+The local setup can be customized with environment varibles. Some are required for a functional deployment.
 
+| Name             | Description                                                   | Default               |
+|------------------|---------------------------------------------------------------|-----------------------|
+| `NAMESPACE`      | Kubernetes namespace to install `infra`                       | `""`                  |
+| `VALUES`         | Values file to pass to Helm                                   | `docker-desktop.yaml` |
 
+```bash
+make dev
+```
 
+### Customizing local setup beyond the basics
+
+If further customization is required, additional values files can be supplied to the installation by modifying the `VALUES` environment variable. It is recommended to append to `VALUES` rather than fully overriding it.
+
+Some common configurations for local development include:
+
+* Disable persistence
+
+```yaml
+# example infra.yaml
+---
+server:
+  persistence:
+    enabled: false
+```
+
+* Disable telemetry
+
+```yaml
+# example infra.yaml
+---
+server:
+  config:
+    enable-telemetry: false
+```
+
+* Enable in-cluster connector
+
+> Note: enabling in-cluster connector disables first-time user signup and requires an admin user to be created by Helm
+
+```yaml
+---
+# example infra.yaml
+server:
+  additionalIdentities:
+    - name: admin
+      password: PASSWORD
+
+  additionalGrants:
+    - user: admin
+      role: admin
+      resource: infra
+
+connector:
+  enabled: true
+```
+
+See [Helm Chart reference](./reference/helm-chart.md) for a complete list of options configurable through Helm.
+
+```bash
+export VALUES='infra.yaml docker-desktop.yaml'
+make dev
+```
+
+Or
+
+```bash
+VALUES='infra.yaml docker-desktop.yaml' make dev
+```
+
+Or
+
+```bash
+make dev VALUES='infra.yaml docker-desktop.yaml'
+```

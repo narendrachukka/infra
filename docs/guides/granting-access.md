@@ -1,3 +1,8 @@
+---
+title: Granting Access
+position: 2
+---
+
 # Granting Access
 
 ## Roles

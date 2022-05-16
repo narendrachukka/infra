@@ -1,6 +1,11 @@
+---
+title: Logging in
+position: 1
+---
+
 # Logging In
 
-### 1. Install Infra CLI
+### Install Infra CLI
 
 <details>
   <summary><strong>macOS</strong></summary>
@@ -40,7 +45,7 @@ sudo dnf install infra
 
 </details>
 
-### 2. Login to Infra
+### Login to Infra
 
 ```
 infra login SERVER
@@ -48,19 +53,19 @@ infra login SERVER
 
 > **Don't know your Infra server?<br />** Ask your Infra team for the hostname that you should use to login.
 
-### 3. See what you can access
+### See what you can access
 
 ```
 infra list
 ```
 
-### 4. Switch to the cluster context you want
+### Switch to the cluster context you want
 
 ```
 infra use DESTINATION
 ```
 
-### 5. Use your preferred tool to run commands
+### Use your preferred tool to run commands
 
 ```
 # for example, you can run kubectl commands directly after the infra context is set

@@ -1,9 +1,13 @@
-# Introduction
+---
+title: What is Infra?
+position: 1
+---
 
-![screenshot](../images/header.png)
+# What Is Infra?
 
+![header](../images/header.png)
 
-## Why Infra?
+## Introduction
 
 Infra enables you to discover and access infrastructure (e.g. Kubernetes, databases). We help you connect an identity provider such as Okta or Azure active directory, and map users/groups with the permissions you set to your infrastructure.
 
@@ -89,4 +93,4 @@ Data stored and transmitted by Infra is always encrypted. Read more about our [s
 
 ## What's next
 
-Get up and running with the [Quickstart](./quickstart.md) guide or read about the [Key Concepts](./key-concepts.md).
+Get up and running with the [Quickstart](./quickstart.md) guide or read about the [how Infra works](./how-infra-works.md).

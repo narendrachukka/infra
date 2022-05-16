@@ -1,4 +1,9 @@
-# Adding & Removing Users
+---
+title: Add & remove users
+position: 3
+---
+
+# Add & remove users
 
 ## Adding users
 

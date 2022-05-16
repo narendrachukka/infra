@@ -1,3 +1,8 @@
+---
+title: Quickstart
+position: 2
+---
+
 # Quickstart
 
 In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
@@ -12,17 +17,17 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 * Install Kubernetes [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) (v1.14+)
 * A Kubernetes cluster. For local testing we recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### 1. Install Infra CLI
+### Install Infra CLI
 
 <details>
   <summary><strong>macOS</strong></summary>
 
-  ```bash
+  ```
   brew install infrahq/tap/infra
   ```
 
   You may need to perform `brew link` if your symlinks are not working.
-  ```bash
+  ```
   brew link infrahq/tap/infra
   ```
 </details>
@@ -40,13 +45,13 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 <details>
   <summary><strong>Linux</strong></summary>
 
-  ```bash
+  ```
   # Ubuntu & Debian
   echo 'deb [trusted=yes] https://apt.fury.io/infrahq/ /' | sudo tee /etc/apt/sources.list.d/infrahq.list
   sudo apt update
   sudo apt install infra
   ```
-  ```bash
+  ```
   # Fedora & Red Hat Enterprise Linux
   sudo dnf config-manager --add-repo https://yum.fury.io/infrahq/
   sudo dnf install infra
@@ -54,7 +59,7 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 </details>
 
 
-### 2. Deploy Infra
+### Deploy Infra
 
 Deploy Infra to your Kubernetes cluster via `helm`:
 
@@ -79,7 +84,7 @@ infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
 ```
 
 
-### 3. Connect your first Kubernetes cluster
+### Connect your first Kubernetes cluster
 
 Generate an access key:
 
@@ -107,7 +112,7 @@ helm upgrade --install infra-connector infrahq/infra \
 
 | Note: it may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
 
-### 4. Add a user and grant access to the cluster
+### Add a user and grant access to the cluster
 
 Next, add a user:
 
@@ -123,7 +128,7 @@ Grant this user read-only access to the Kubernetes cluster you just connected to
 infra grants add user@example.com example-cluster --role view
 ```
 
-### 5. Login as the example user and access the cluster:
+### Login as the example user and access the cluster:
 
 Use the one-time password in the previous step to log in as the user. You'll be prompted to change the user's password since it's this new user's first time logging in.
 

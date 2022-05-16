@@ -1,12 +1,13 @@
-# Key Concepts
+---
+title: How Infra Works
+position: 3
+---
+
+# How Infra Works
 
 ## Architecture
 
-<br />
-
 ![architecture](../images/architecture.svg)
-
-<br />
 
 
 ### 1. Infra Server
@@ -32,8 +33,6 @@ Connectors are responsible for authenticating and provisioning user access in de
 ### Putting it all together
 
 Infra works by connecting users to specific destinations via _connectors_. Users log in via the Infra CLI, configure access, and finally install connectors. Once set up, anyone on the team can run `infra login` to get access to the infrastructure they need:
-
-<br />
 
 ## Core API Resources
 

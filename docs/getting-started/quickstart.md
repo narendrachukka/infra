@@ -5,11 +5,7 @@ position: 2
 
 # Quickstart
 
-In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
-* Install Infra CLI
-* Deploy Infra
-* Connect a Kubernetes cluster
-* Create a user and grant them view (read-only) access to the cluster
+In this quickstart we'll set up Infra to manage user access to a Kubernetes cluster.
 
 ## Prerequisites
 
@@ -24,10 +20,6 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 ```
 brew install infrahq/tap/infra
 ```
-You may need to perform `brew link` if your symlinks are not working.
-```
-brew link infrahq/tap/infra
-```
 {% /tab %}
 {% tab label="Windows" %}
 ```powershell
@@ -35,15 +27,18 @@ scoop bucket add infrahq https://github.com/infrahq/scoop.git
 scoop install infra
 ```
 {% /tab %}
+
 {% tab label="Linux" %}
+
+#### Ubuntu & Debian
 ```
-# Ubuntu & Debian
 echo 'deb [trusted=yes] https://apt.fury.io/infrahq/ /' | sudo tee /etc/apt/sources.list.d/infrahq.list
 sudo apt update
 sudo apt install infra
 ```
+
+#### Fedora & Red Hat Enterprise Linux
 ```
-# Fedora & Red Hat Enterprise Linux
 sudo dnf config-manager --add-repo https://yum.fury.io/infrahq/
 sudo dnf install infra
 ```
@@ -61,24 +56,29 @@ helm repo update
 helm install infra infrahq/infra
 ```
 
-Next, find the hostname for the Infra server you just deployed:
+Next, log into your instance of Infra to setup your admin account:
+
+```
+infra login localhost --skip-tls-verify
+```
+
+
+{% callout type="info" %}
+If you're not using Docker Desktop, you'll be using a different endpoint than `localhost`, which can be found via the following `kubectl` command:
 
 ```
 kubectl get service infra-server -o jsonpath="{.status.loadBalancer.ingress[*]['ip', 'hostname']}" -w
 ```
 
-> Note: It may take a few minutes for the LoadBalancer to be provisioned for the Infra server
+Note: it may take a few minutes for the LoadBalancer to be provisioned.
 
-Login to the Infra server using the hostname above and follow the prompt to create your admin account:
+{% /callout %}
 
-```
-infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
-```
 
 
 ## Connect your first Kubernetes cluster
 
-Generate an access key:
+Generate a connector key:
 
 ```
 infra keys add connector
@@ -86,25 +86,21 @@ infra keys add connector
 
 Next, use this access key to connect your first cluster via `helm`. **Note:** this can be the same cluster used to install Infra in step 2.
 
-Prepare your values:
-
-* `connector.config.name`: choose a name for this cluster
-* `connector.config.server`: the same hostname used for `infra login`
-* `connector.config.accessKey`: the key created above via `infra keys add`
-
 Install the Infra connector via `helm`:
 
 ```
 helm upgrade --install infra-connector infrahq/infra \
   --set connector.config.name=example-cluster \
-  --set connector.config.server=<INFRA_SERVER_HOSTNAME> \
-  --set connector.config.accessKey=<ACCESS_KEY> \
+  --set connector.config.server=localhost \
+  --set connector.config.accessKey=<CONNECTOR_KEY> \
   --set connector.config.skipTLSVerify=true
 ```
 
-| Note: it may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
+{% callout type="info" %}
+It may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
+{% /callout %}
 
-## Add a user and grant access to the cluster
+## Add a user and grant cluster access
 
 Next, add a user:
 
@@ -112,7 +108,9 @@ Next, add a user:
 infra users add user@example.com
 ```
 
-| Note: Infra will provide you a one-time password. Please note this password for step 5.
+{% callout type="info" %}
+Infra will provide you a one-time password. Please note this password for the next step.
+{% /callout %}
 
 Grant this user read-only access to the Kubernetes cluster you just connected to Infra:
 
@@ -120,12 +118,12 @@ Grant this user read-only access to the Kubernetes cluster you just connected to
 infra grants add user@example.com example-cluster --role view
 ```
 
-## Login as the example user and access the cluster:
+## Login as the example user
 
 Use the one-time password in the previous step to log in as the user. You'll be prompted to change the user's password since it's this new user's first time logging in.
 
 ```
-infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
+infra login localhost --skip-tls-verify
 ```
 
 Next, view this user's cluster access. You should see the user has `view` access to the `example-cluster` cluster connected above:

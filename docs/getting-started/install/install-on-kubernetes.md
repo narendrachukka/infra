@@ -1,40 +1,39 @@
 ---
-position: 2
+position: 1
 ---
 
 # Install Infra on Kubernetes
 
-**Prerequisites:**
+## Prerequisites
+
 * Install [Helm](https://helm.sh/) (v3+)
 * Install [Kubernetes](https://kubernetes.io/) (v1.14+)
 
-To see the available Helm configuration values, use:
+## Install via Helm
 
-```bash
-helm show values infrahq/infra
+Install infra via `helm`:
+
+```
+helm repo add infrahq https://helm.infrahq.com
+helm repo update
+helm install infra infrahq/infra
 ```
 
-### Step 1: Configure the Infra Chart
-
-> Note: Infra uses [Secrets](./configure/secrets.md) to securely load secrets.
-> It is _not_ recommended to use plain text secrets. Considering using another supported secret type.
-
-> Please follow [Okta Configuration](../guides/identity-providers/okta.md) to obtain `clientID` and `clientSecret` for connecting Okta to Infra.
+## Customize your install
 
 ```yaml
 # example values.yaml
 ---
 server:
   # Add an Identity Provider
-  # Only Okta is supported currently
-  # additionalProviders:
-  #   - name: Okta
-  #     url: example.okta.com
-  #     clientID: example_jsldf08j23d081j2d12sd
-  #     clientSecret:  example_plain_secret # see note above
+  additionalProviders:
+    - name: Okta
+      url: example.okta.com
+      clientID: example_jsldf08j23d081j2d12sd
+      clientSecret:  example_plain_secret # see note above
 
   # Add an admin user
-  additionalIdentities:
+  additionalUsers:
     - name: admin
       password: password
 
@@ -63,49 +62,7 @@ server:
       resource: example-cluster            # limit access to the `example-cluster` Kubernetes cluster
 ```
 
-### Step 2: Install Infra
-
-```bash
-helm repo add infrahq https://helm.infrahq.com/
-helm repo update
-helm upgrade --install infra infrahq/infra --values values.yaml
-```
-
-### Step 3: Login to Infra
-
-Next, you'll need to find the URL of the Infra server to login to Infra.
-
-#### Port Forwarding
-
-Kubernetes port forwarding can be used in access the API server.
-
-```bash
-kubectl port-forward deployments/infra-server 8080:80 8443:443
-```
-
-Infra API server can now be accessed on `localhost:8080` or `localhost:8443`
-
-#### LoadBalancer
-
-Change the Infra server service type to `LoadBalancer`.
-
-```bash
-kubectl patch service infra-server -p '{"spec": {"type": "LoadBalancer"}}'
-```
-
-> Note: It may take a few minutes for the LoadBalancer endpoint to be assigned. You can watch the status of the service with:
-
-```bash
-kubectl get service infra-server -w
-```
-
-Once the endpoint is ready, get the Infra API server URL.
-
-```bash
-kubectl get service infra-server -o jsonpath="{.status.loadBalancer.ingress[*]['ip', 'hostname']}"
-```
-
-#### Ingress
+### Ingress
 
 Follow the [Ingress documentation](../reference/helm-chart.md#advanced-ingress-configuration) to configure your Infra server with a Kubernetes ingress.
 Once configured, get the Infra API server URL.
@@ -118,9 +75,9 @@ kubectl get ingress infra-server -o jsonpath="{.status.loadBalancer.ingress[*]['
 infra login <INFRA_API_SERVER>
 ```
 
-## Add Kubernetes Connectors
+### Add connectors
 
-### Step 1: Create an Access Key
+#### Step 1: Create an Access Key
 
 In order to add connectors to Infra, you will need to generate an access key. If you already have an access key, proceed to step 2.
 

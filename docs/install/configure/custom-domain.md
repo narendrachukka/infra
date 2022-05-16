@@ -11,7 +11,6 @@ infra-regsitry     LoadBalancer   10.12.11.116   31.58.101.169   80:32326/TCP   
 
 In this case, Infra is exposed on IP `31.58.101.169`
 
-<br/><br/>
 ## Add DNS records
 
 Add the following DNS records to set up automatic LetsEncrypt certificates for your Infra Server.
@@ -25,7 +24,6 @@ Add the following DNS records to set up automatic LetsEncrypt certificates for y
 
 Note that some Load Balancers (e.g. on AWS) will require using a **CNAME** record instead.
 
-<br/><br/>
 ## Login via the new domain
 
 ```

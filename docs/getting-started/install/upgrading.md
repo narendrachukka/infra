@@ -1,5 +1,5 @@
 ---
-position: 4
+position: 3
 ---
 
 # Upgrading
@@ -71,10 +71,6 @@ You can also download the [latest Infra release][1] directly from the repository
 ```
 brew update
 brew upgrade infra
-```
-You may need to perform `brew link` if your symlinks are not working.
-```
-brew link infrahq/tap/infra
 ```
 {% /tab %}
 {% tab label="Windows" %}

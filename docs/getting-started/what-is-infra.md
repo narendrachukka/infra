@@ -13,7 +13,7 @@ Infra enables you to discover and access infrastructure (e.g. Kubernetes, databa
 
 If you don't have an identity provider, Infra supports local users for you to get started before connecting an identity provider.
 
-### Features
+## Features
 
 * Easy-to-use CLI: **discover & login** to infrastructure in one command
 * **No more out-of-sync** credentials or configurations (e.g. Kubeconfig)
@@ -22,7 +22,7 @@ If you don't have an identity provider, Infra supports local users for you to ge
 * Workflow for **dynamically requesting & granting access** to users (coming soon)
 * **Audit logs** for who accessed what, when (coming soon)
 
-### Example (Kubernetes)
+## Example (Kubernetes)
 
 ```bash
 # Log in as henry@acme.com via Okta
@@ -53,6 +53,8 @@ web-d6797786d-cz5jh   1/1     Running   0          8h
 web-d6797786d-wzxns   1/1     Running   0          8h
 web-d6797786d-zjbvl   1/1     Running   0          8h
 ```
+
+## Why Infra?
 
 ### Deploy anywhere
 

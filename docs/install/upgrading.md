@@ -66,34 +66,23 @@ You can also download the [latest Infra release][1] directly from the repository
 
 ## Upgrading Infra CLI
 
-### macOS
-
-1. Update Homebrew
-
-    ```bash
-    brew update
-    ```
-
-2. Upgrade Infra CLI
-
-    ```bash
-    brew upgrade infra
-    ```
-
-3. Check Infra CLI version
-
-    ```bash
-    infra version
-    ```
-
-### Windows
-
+{% tabs %}
+{% tab label="macOS" %}
+```
+brew update
+brew upgrade infra
+```
+You may need to perform `brew link` if your symlinks are not working.
+```
+brew link infrahq/tap/infra
+```
+{% /tab %}
+{% tab label="Windows" %}
 ```powershell
 scoop update infra
 ```
-
-### Linux
-
+{% /tab %}
+{% tab label="Linux" %}
 ```bash
 # Ubuntu & Debian
 sudo apt update
@@ -104,33 +93,9 @@ sudo apt upgrade infra
 # Fedora & Red Hat Enterprise Linux
 sudo dnf update infra
 ```
+{% /tab %}
+{% /tabs %}
 
 ### Other Distributions
 
-Binary releases can be downloaded and installed directly from the repository.
-
-<details>
-  <summary><strong>x86_64</strong></summary>
-
-<!-- {x-release-please-start-version} -->
-  ```bash
-  LATEST=0.13.0
-  curl -sSL https://github.com/infrahq/infra/releases/download/v$LATEST/infra_${LATEST}_linux_x86_64.zip
-  unzip -d /usr/local/bin infra_${LATEST}_linux_x86_64.zip
-  ```
-<!-- {x-release-please-end} -->
-</details>
-
-<details>
-  <summary><strong>ARM</strong></summary>
-
-<!-- {x-release-please-start-version} -->
-  ```bash
-  LATEST=0.13.0
-  curl -sSL https://github.com/infrahq/infra/releases/download/v$LATEST/infra_${LATEST}_linux_arm64.zip
-  unzip -d /usr/local/bin infra_${LATEST}_linux_arm64.zip
-  ```
-<!-- {x-release-please-end} -->
-</details>
-
-[1]: https://github.com/infrahq/infra/releases/latest
+Binary releases can be downloaded and installed directly from [the repository](https://github.com/infrahq/infra/releases).

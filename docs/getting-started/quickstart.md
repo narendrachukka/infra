@@ -11,55 +11,47 @@ In this quickstart we'll set up Infra to manage single sign-on to Kubernetes:
 * Connect a Kubernetes cluster
 * Create a user and grant them view (read-only) access to the cluster
 
-### Prerequisites
+## Prerequisites
 
 * Install [helm](https://helm.sh/docs/intro/install/) (v3+)
 * Install Kubernetes [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) (v1.14+)
 * A Kubernetes cluster. For local testing we recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### Install Infra CLI
+## Install Infra CLI
 
-<details>
-  <summary><strong>macOS</strong></summary>
-
-  ```
-  brew install infrahq/tap/infra
-  ```
-
-  You may need to perform `brew link` if your symlinks are not working.
-  ```
-  brew link infrahq/tap/infra
-  ```
-</details>
-
-<details>
-  <summary><strong>Windows</strong></summary>
-
-  ```powershell
-  scoop bucket add infrahq https://github.com/infrahq/scoop.git
-  scoop install infra
-  ```
-
-</details>
-
-<details>
-  <summary><strong>Linux</strong></summary>
-
-  ```
-  # Ubuntu & Debian
-  echo 'deb [trusted=yes] https://apt.fury.io/infrahq/ /' | sudo tee /etc/apt/sources.list.d/infrahq.list
-  sudo apt update
-  sudo apt install infra
-  ```
-  ```
-  # Fedora & Red Hat Enterprise Linux
-  sudo dnf config-manager --add-repo https://yum.fury.io/infrahq/
-  sudo dnf install infra
-  ```
-</details>
+{% tabs %}
+{% tab label="macOS" %}
+```
+brew install infrahq/tap/infra
+```
+You may need to perform `brew link` if your symlinks are not working.
+```
+brew link infrahq/tap/infra
+```
+{% /tab %}
+{% tab label="Windows" %}
+```powershell
+scoop bucket add infrahq https://github.com/infrahq/scoop.git
+scoop install infra
+```
+{% /tab %}
+{% tab label="Linux" %}
+```
+# Ubuntu & Debian
+echo 'deb [trusted=yes] https://apt.fury.io/infrahq/ /' | sudo tee /etc/apt/sources.list.d/infrahq.list
+sudo apt update
+sudo apt install infra
+```
+```
+# Fedora & Red Hat Enterprise Linux
+sudo dnf config-manager --add-repo https://yum.fury.io/infrahq/
+sudo dnf install infra
+```
+{% /tab %}
+{% /tabs %}
 
 
-### Deploy Infra
+## Deploy Infra
 
 Deploy Infra to your Kubernetes cluster via `helm`:
 
@@ -84,7 +76,7 @@ infra login <INFRA_SERVER_HOSTNAME> --skip-tls-verify
 ```
 
 
-### Connect your first Kubernetes cluster
+## Connect your first Kubernetes cluster
 
 Generate an access key:
 
@@ -112,7 +104,7 @@ helm upgrade --install infra-connector infrahq/infra \
 
 | Note: it may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
 
-### Add a user and grant access to the cluster
+## Add a user and grant access to the cluster
 
 Next, add a user:
 
@@ -128,7 +120,7 @@ Grant this user read-only access to the Kubernetes cluster you just connected to
 infra grants add user@example.com example-cluster --role view
 ```
 
-### Login as the example user and access the cluster:
+## Login as the example user and access the cluster:
 
 Use the one-time password in the previous step to log in as the user. You'll be prompted to change the user's password since it's this new user's first time logging in.
 
@@ -159,7 +151,7 @@ Congratulations, you've:
 * Connected your first cluster
 * Created a user and granted them `view` access to the cluster
 
-### Next Steps
+## Next Steps
 
 * [Connect Okta](../guides/identity-providers/okta.md) to onboard & offboard your team automatically
 * [Manage & revoke access](../guides/granting-access.md) to users or groups

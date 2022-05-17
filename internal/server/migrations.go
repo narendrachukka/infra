@@ -132,11 +132,6 @@ func (a *API) addResponseRewrites() {
 	// next migration...
 }
 
-func (a *API) addRewrites() {
-	a.addRequestRewrites()
-	a.addResponseRewrites()
-}
-
 // addRedirects for API endpoints that have moved to a different path
 func (a *API) addRedirects() {
 	addRedirect(a, http.MethodGet, "/v1/identities", "/v1/users", "0.12.2")

@@ -23,26 +23,28 @@ type apiMigration struct {
 	method          string
 	path            string
 	version         string
-	redirect        string
+	rename          string
 	requestRewrite  func(c *gin.Context)
 	responseRewrite func(c *gin.Context)
 }
 
-func addRedirect(a *API, method, path, newPath, version string) {
-	// update any existing migrations with the legacy path
-	for i, mig := range a.migrations {
-		if len(mig.redirect) == 0 && mig.path == path {
+// TODO: rename to addRename
+func addRedirect(a *API, method, oldPath, newPath, version string) {
+	for i, existing := range a.migrations {
+		// update request/response rewrite migrations to the new canonical path
+		if existing.rename == "" && existing.path == oldPath {
 			a.migrations[i].path = newPath
 		}
-		if len(mig.redirect) > 0 && mig.redirect == path {
-			a.migrations[i].redirect = newPath
+		// update redirect migrations to redirect to the new canonical path
+		if existing.rename != "" && existing.rename == oldPath {
+			a.migrations[i].rename = newPath
 		}
 	}
 	a.migrations = append(a.migrations, apiMigration{
-		method:   method,
-		path:     path,
-		version:  version,
-		redirect: newPath,
+		method:  method,
+		path:    oldPath,
+		version: version,
+		rename:  newPath,
 	})
 }
 
@@ -201,7 +203,7 @@ func addResponseRewrite[newResp any, oldResp any](a *API, method, path, version 
 
 func (m *apiMigration) RedirectHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Request.URL.Path = m.redirect
+		c.Request.URL.Path = m.rename
 		c.Next()
 	}
 }

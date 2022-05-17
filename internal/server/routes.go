@@ -48,7 +48,8 @@ func (s *Server) GenerateRoutes(promRegistry prometheus.Registerer) Routes {
 		TimeoutMiddleware(1*time.Minute),
 	)
 
-	a.addRewrites()
+	a.addRequestRewrites()
+	a.addResponseRewrites()
 	a.addRedirects()
 
 	// This group of middleware only applies to non-ui routes
@@ -224,10 +225,8 @@ func redirectsFor(a *API, method, path string) []apiMigration {
 		if strings.ToUpper(migration.method) != method {
 			continue
 		}
-		if migration.redirect != path {
-			continue
-		}
-		if len(migration.redirect) > 0 {
+		// TODO: also check version
+		if migration.rename == path {
 			redirectPaths = append(redirectPaths, migration)
 		}
 	}

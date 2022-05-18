@@ -49,9 +49,7 @@ func (s *Server) GenerateRoutes(promRegistry prometheus.Registerer) Routes {
 		TimeoutMiddleware(1*time.Minute),
 	)
 
-	a.addRequestRewrites()
-	a.addResponseRewrites()
-	a.addRedirects()
+	a.populateVersionHandlers()
 
 	// This group of middleware only applies to non-ui routes
 	apiGroup := router.Group("/",
@@ -264,39 +262,6 @@ func put[Req, Res any](a *API, r *gin.RouterGroup, path string, handler HandlerF
 
 func delete[Req any, Res any](a *API, r *gin.RouterGroup, path string, handler HandlerFunc[Req, Res]) {
 	add(a, r, route[Req, Res]{method: http.MethodDelete, path: path, handler: handler})
-}
-
-func redirectsFor(a *API, method, path string) []apiMigration {
-	redirectPaths := []apiMigration{}
-	for _, migration := range a.migrations {
-		if strings.ToUpper(migration.method) != method {
-			continue
-		}
-		// TODO: also check version
-		if migration.rename == path {
-			redirectPaths = append(redirectPaths, migration)
-		}
-	}
-	return redirectPaths
-}
-
-func includeRewritesFor(a *API, method, path string) gin.HandlersChain {
-	result := []gin.HandlerFunc{}
-	for _, migration := range a.migrations {
-		if strings.ToUpper(migration.method) != method {
-			continue
-		}
-		if migration.path != path {
-			continue
-		}
-		if migration.requestRewrite != nil {
-			result = append(result, migration.requestRewrite)
-		}
-		if migration.responseRewrite != nil {
-			result = append(result, migration.responseRewrite)
-		}
-	}
-	return result
 }
 
 func bind(c *gin.Context, req interface{}) error {

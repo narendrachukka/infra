@@ -24,7 +24,6 @@ import (
 type API struct {
 	t          *Telemetry
 	server     *Server
-	migrations []apiMigration
 	openAPIDoc openapi3.T
 	versions   map[routeKey][]routeVersion
 }

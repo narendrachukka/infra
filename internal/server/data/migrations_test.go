@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/infrahq/secrets"
 	"gorm.io/gorm"
 	"gotest.tools/v3/assert"
 
@@ -14,59 +13,50 @@ import (
 
 // see loadSQL for setting up your own migration test
 func Test202204111503(t *testing.T) {
-	db := setupWithNoMigrations(t, func(db *gorm.DB) {
+	runDBTestsForMigrations(t, func(t *testing.T, db *gorm.DB) {
 		loadSQL(t, db, "202204111503")
+
+		assert.NilError(t, PreMigrate(db))
+		setupGlobals(t)
+
+		err := Migrate(db)
+		assert.NilError(t, err)
+
+		ids, err := ListIdentities(db, ByName("steven@example.com"))
+		assert.NilError(t, err)
+
+		assert.Assert(t, len(ids) == 1)
 	})
-
-	err := Migrate(db)
-	assert.NilError(t, err)
-
-	ids, err := ListIdentities(db, ByName("steven@example.com"))
-	assert.NilError(t, err)
-
-	assert.Assert(t, len(ids) == 1)
 }
 
 func Test202204211705(t *testing.T) {
-	db := setupWithNoMigrations(t, func(db *gorm.DB) {
+	runDBTestsForMigrations(t, func(t *testing.T, db *gorm.DB) {
 		loadSQL(t, db, "202204211705")
+
+		assert.NilError(t, PreMigrate(db))
+		setupGlobals(t)
+
+		err := Migrate(db)
+		assert.NilError(t, err)
+
+		// check it still works
+		settings, err := GetSettings(db)
+		assert.NilError(t, err)
+
+		assert.Assert(t, settings != nil)
+		assert.Assert(t, settings.PrivateJWK[0] == '{') // unencrypted type is json string.
+
+		// check the storage data
+		type Settings struct {
+			models.Model
+			PrivateJWK []byte
+		}
+		rawSettings := Settings{}
+		err = db.Model(rawSettings).Where("id = ?", settings.ID).First(&rawSettings).Error
+		assert.NilError(t, err)
+
+		assert.Assert(t, rawSettings.PrivateJWK[0] != '{')
 	})
-
-	key, err := tmpSymmetricKey()
-	assert.NilError(t, err)
-
-	models.SymmetricKey = key
-
-	err = Migrate(db)
-	assert.NilError(t, err)
-
-	// check it still works
-	settings, err := GetSettings(db)
-	assert.NilError(t, err)
-
-	assert.Assert(t, settings != nil)
-	assert.Assert(t, settings.PrivateJWK[0] == '{') // unencrypted type is json string.
-
-	// check the storage data
-	type Settings struct {
-		models.Model
-		PrivateJWK []byte
-	}
-	rawSettings := Settings{}
-	err = db.Model(rawSettings).Where("id = ?", settings.ID).First(&rawSettings).Error
-	assert.NilError(t, err)
-
-	assert.Assert(t, rawSettings.PrivateJWK[0] != '{')
-}
-
-func tmpSymmetricKey() (*secrets.SymmetricKey, error) {
-	sp := secrets.NewFileSecretProviderFromConfig(secrets.FileConfig{
-		Path: os.TempDir(),
-	})
-
-	rootKey := "db_at_rest"
-	symmetricKeyProvider := secrets.NewNativeKeyProvider(sp)
-	return symmetricKeyProvider.GenerateDataKey(rootKey)
 }
 
 // loadSQL loads a sql file from disk by a file name matching the migration it's meant to test.
@@ -101,21 +91,17 @@ func loadSQL(t *testing.T, db *gorm.DB, filename string) {
 	assert.NilError(t, err)
 }
 
-func setupWithNoMigrations(t *testing.T, f func(db *gorm.DB)) *gorm.DB {
-	driver, err := NewSQLiteDriver("file::memory:")
-	assert.NilError(t, err)
-
-	db, err := NewRawDB(driver)
-	assert.NilError(t, err)
-
-	f(db)
-
-	models.SkipSymmetricKey = true
-	t.Cleanup(func() {
-		models.SkipSymmetricKey = false
-	})
-
-	setupLogging(t)
-
-	return db
+// runDBTestsForMigrations against all supported databases. Defaults to only
+// sqlite locally, and all supported DBs in CI.
+// This function is intended to be used only with tests for migrations. Use
+// runDBTests for all other tests. This is necessary because migrations need to
+// be run from a very specific DB state.
+func runDBTestsForMigrations(t *testing.T, run func(t *testing.T, db *gorm.DB)) {
+	for _, driver := range dbDrivers(t) {
+		t.Run(driver.Name(), func(t *testing.T) {
+			db, err := NewRawDB(driver)
+			assert.NilError(t, err)
+			run(t, db)
+		})
+	}
 }

@@ -23,24 +23,34 @@ func setupDB(t *testing.T, driver gorm.Dialector) *gorm.DB {
 	// TODO: change this to use the same calls as production.
 	assert.NilError(t, Migrate(db))
 
-	fp := secrets.NewFileSecretProviderFromConfig(secrets.FileConfig{
-		Path: os.TempDir(),
-	})
-
-	kp := secrets.NewNativeKeyProvider(fp)
-
-	key, err := kp.GenerateDataKey("")
-	assert.NilError(t, err)
-
-	models.SymmetricKey = key
+	setupGlobals(t)
 
 	err = db.Create(&models.Provider{Name: models.InternalInfraProviderName}).Error
 	assert.NilError(t, err)
 
+	return db
+}
+
+// TODO: it would be great to find a way to have fewer globals
+func setupGlobals(t *testing.T) {
+	setupSymmetricKey(t)
 	setupLogging(t)
 	t.Cleanup(InvalidateCache)
+}
 
-	return db
+func setupSymmetricKey(t *testing.T) {
+	fp := secrets.NewFileSecretProviderFromConfig(secrets.FileConfig{
+		Path: t.TempDir(),
+	})
+
+	kp := secrets.NewNativeKeyProvider(fp)
+	key, err := kp.GenerateDataKey("")
+	assert.NilError(t, err)
+
+	models.SymmetricKey = key
+	t.Cleanup(func() {
+		models.SymmetricKey = nil
+	})
 }
 
 func setupLogging(t *testing.T) {

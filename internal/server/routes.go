@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
@@ -35,7 +36,7 @@ type Routes struct {
 // with all the middleware that will apply to the route when the
 // Router.{GET,POST,etc} method is called.
 func (s *Server) GenerateRoutes(promRegistry prometheus.Registerer) Routes {
-	a := &API{t: s.tel, server: s}
+	a := &API{t: s.tel, server: s, versions: make(map[routeKey][]routeVersion)}
 	router := gin.New()
 	router.NoRoute(a.notFoundHandler)
 
@@ -76,7 +77,7 @@ func (s *Server) GenerateRoutes(promRegistry prometheus.Registerer) Routes {
 	post(a, authn, "/api/groups", a.CreateGroup)
 	get(a, authn, "/api/groups/:id", a.GetGroup)
 
-	get(a, authn, "/api/grants", a.ListGrants)
+	get(a, authn, "/api/grants", ListGrants)
 	get(a, authn, "/api/grants/:id", a.GetGrant)
 	post(a, authn, "/api/grants", a.CreateGrant)
 	delete(a, authn, "/api/grants/:id", a.DeleteGrant)
@@ -143,11 +144,10 @@ func (s *Server) GenerateRoutes(promRegistry prometheus.Registerer) Routes {
 type HandlerFunc[Req, Res any] func(c *gin.Context, req *Req) (Res, error)
 
 type route[Req, Res any] struct {
-	method            string
-	path              string
-	handler           HandlerFunc[Req, Res]
-	omitFromDocs      bool
-	omitFromTelemetry bool
+	method       string
+	path         string
+	handler      HandlerFunc[Req, Res]
+	omitFromDocs bool
 }
 
 func add[Req, Res any](a *API, r *gin.RouterGroup, route route[Req, Res]) {
@@ -157,33 +157,78 @@ func add[Req, Res any](a *API, r *gin.RouterGroup, route route[Req, Res]) {
 		a.register(openAPIRouteDefinition(route))
 	}
 
-	handlers := includeRewritesFor(a, route.method, route.path)
-	handlers = append(handlers, func(c *gin.Context) {
+	handler := func(c *gin.Context) {
+		headerVer := c.Request.Header.Get("Infra-Version")
+		if headerVer == "" {
+			// make this an error in v0.15.0
+			headerVer = "0.0.0"
+		}
+		if headerVer == "" {
+			sendAPIError(c, fmt.Errorf("%w: Infra-Version header required", internal.ErrBadRequest))
+			return
+		}
+		reqVer, err := semver.NewVersion(headerVer)
+		if err != nil {
+			sendAPIError(c, fmt.Errorf("%w: invalid Infra-Version header: %s", internal.ErrBadRequest, err))
+			return
+		}
+		versions := a.versions[routeKey{method: route.method, path: route.path}]
+		if versionedHandler := handlerForVersion(versions, reqVer); versionedHandler != nil {
+			versionedHandler(c)
+			return
+		}
+		// the request is for the latest version
+		wrapHandler(route.handler)(c)
+	}
+	r.Handle(route.method, route.path, handler)
+}
+
+type routeKey struct {
+	method string
+	path   string
+}
+
+type routeVersion struct {
+	version *semver.Version
+	handler func(c *gin.Context)
+}
+
+func handlerForVersion(versions []routeVersion, reqVer *semver.Version) func(c *gin.Context) {
+	// TODO: iterate in reverse order to benefit newer versions over older versions
+	for _, v := range versions {
+		if reqVer.GreaterThan(v.version) {
+			continue
+		}
+		return v.handler
+	}
+	return nil
+}
+
+// wrapHandler wraps a handler to provide unmarshalling of the request into
+// the Req type, marshalling the Res type into the response, and emitting a
+// telemetry event.
+// Any errors will be translated into the appropriate status code and send in the
+// response.
+func wrapHandler[Req, Res any](handler HandlerFunc[Req, Res]) func(c *gin.Context) {
+	return func(c *gin.Context) {
 		req := new(Req)
 		if err := bind(c, req); err != nil {
 			sendAPIError(c, err)
 			return
 		}
 
-		resp, err := route.handler(c, req)
+		resp, err := handler(c, req)
 		if err != nil {
 			sendAPIError(c, err)
 			return
 		}
 
-		if !route.omitFromTelemetry {
-			a.t.RouteEvent(c, route.path, Properties{"method": strings.ToLower(route.method)})
+		if c.Request.Method != http.MethodGet {
+			// TODO: get telemetry from context
+			//a.t.RouteEvent(c, path, Properties{"method": strings.ToLower(method)})
 		}
 
-		c.JSON(defaultResponseCodeForMethod(route.method), resp)
-	})
-
-	r.Handle(route.method, route.path, handlers...)
-
-	for _, migration := range redirectsFor(a, route.method, route.path) {
-		handlers = append([]gin.HandlerFunc{migration.RedirectHandler()}, handlers...)
-		// TODO: migration.path is absolute, but the router group could have a prefix.
-		r.Handle(route.method, migration.path, handlers...)
+		c.JSON(defaultResponseCodeForMethod(c.Request.Method), resp)
 	}
 }
 
@@ -199,12 +244,7 @@ func defaultResponseCodeForMethod(method string) int {
 }
 
 func get[Req, Res any](a *API, r *gin.RouterGroup, path string, handler HandlerFunc[Req, Res]) {
-	add(a, r, route[Req, Res]{
-		method:            http.MethodGet,
-		path:              path,
-		handler:           handler,
-		omitFromTelemetry: true,
-	})
+	add(a, r, route[Req, Res]{method: http.MethodGet, path: path, handler: handler})
 }
 
 func post[Req, Res any](a *API, r *gin.RouterGroup, path string, handler HandlerFunc[Req, Res]) {

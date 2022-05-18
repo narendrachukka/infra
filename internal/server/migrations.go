@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/infrahq/infra/api"
 	"github.com/infrahq/infra/uid"
 )
@@ -35,11 +37,6 @@ func (a *API) addRequestRewrites() {
 			ExtensionDeadline: old.ExtensionDeadline,
 		}
 	})
-	type listGrantsRequestV0_12_2 struct {
-		Subject   uid.PolymorphicID `form:"subject"`
-		Resource  string            `form:"resource"`
-		Privilege string            `form:"privilege"`
-	}
 	addRequestRewrite(a, http.MethodGet, "/v1/grants", "0.12.2", func(oldRequest listGrantsRequestV0_12_2) api.ListGrantsRequest {
 		var user, group uid.ID
 
@@ -130,6 +127,13 @@ func (a *API) addResponseRewrites() {
 		}
 	})
 	// next migration...
+
+	a.versions[routeKey{http.MethodGet, "/api/grants"}] = []routeVersion{
+		{
+			version: semver.MustParse("0.12.2"),
+			handler: wrapHandler(listGrantsV0_12_2),
+		},
+	}
 }
 
 // addRedirects for API endpoints that have moved to a different path

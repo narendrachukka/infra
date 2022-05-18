@@ -26,6 +26,7 @@ type API struct {
 	server     *Server
 	migrations []apiMigration
 	openAPIDoc openapi3.T
+	versions   map[routeKey][]routeVersion
 }
 
 func (a *API) ListUsers(c *gin.Context, r *api.ListUsersRequest) (*api.ListResponse[api.User], error) {
@@ -391,7 +392,7 @@ func (a *API) CreateAccessKey(c *gin.Context, r *api.CreateAccessKeyRequest) (*a
 	}, nil
 }
 
-func (a *API) ListGrants(c *gin.Context, r *api.ListGrantsRequest) (*api.ListResponse[api.Grant], error) {
+func ListGrants(c *gin.Context, r *api.ListGrantsRequest) (*api.ListResponse[api.Grant], error) {
 	var subject uid.PolymorphicID
 
 	switch {
@@ -413,14 +414,50 @@ func (a *API) ListGrants(c *gin.Context, r *api.ListGrantsRequest) (*api.ListRes
 	return result, nil
 }
 
+type listGrantsRequestV0_12_2 struct {
+	Subject   uid.PolymorphicID `form:"subject"`
+	Resource  string            `form:"resource"`
+	Privilege string            `form:"privilege"`
+}
+
+// TODO: unmethod all handlers
+// TODO: move grant handlers to grants.go
+// NOTE: this would have been the old function signature before we replaced it.
+// So creating this migration would have been mostly renames and then replacing
+// the call with one to the other handler.
+// The rest of this implementation is identical to the existing migration system,
+// except that the function call to ListGrants is direct.
+func listGrantsV0_12_2(c *gin.Context, req *listGrantsRequestV0_12_2) ([]identityGrant, error) {
+	var user, group uid.ID
+
+	switch {
+	case req.Subject.IsIdentity():
+		user, _ = req.Subject.ID()
+	case req.Subject.IsGroup():
+		group, _ = req.Subject.ID()
+	}
+
+	newReq := api.ListGrantsRequest{
+		User:      user,
+		Group:     group,
+		Resource:  req.Resource,
+		Privilege: req.Privilege,
+	}
+	resp, err := ListGrants(c, &newReq)
+	if err != nil {
+		return nil, err
+	}
+	return api.NewListResponse(resp.Items, migrateUserGrantToIdentity).Items, nil
+}
+
 // TODO: remove after deprecation period
 func (a *API) ListUserGrants(c *gin.Context, r *api.Resource) (*api.ListResponse[api.Grant], error) {
-	return a.ListGrants(c, &api.ListGrantsRequest{User: r.ID})
+	return ListGrants(c, &api.ListGrantsRequest{User: r.ID})
 }
 
 // TODO: remove after deprecation period
 func (a *API) ListGroupGrants(c *gin.Context, r *api.Resource) (*api.ListResponse[api.Grant], error) {
-	return a.ListGrants(c, &api.ListGrantsRequest{Group: r.ID})
+	return ListGrants(c, &api.ListGrantsRequest{Group: r.ID})
 }
 
 func (a *API) GetGrant(c *gin.Context, r *api.Resource) (*api.Grant, error) {

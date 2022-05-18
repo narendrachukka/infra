@@ -158,18 +158,9 @@ func add[Req, Res any](a *API, r *gin.RouterGroup, route route[Req, Res]) {
 	}
 
 	handler := func(c *gin.Context) {
-		headerVer := c.Request.Header.Get("Infra-Version")
-		if headerVer == "" {
-			// make this an error in v0.15.0
-			headerVer = "0.0.0"
-		}
-		if headerVer == "" {
-			sendAPIError(c, fmt.Errorf("%w: Infra-Version header required", internal.ErrBadRequest))
-			return
-		}
-		reqVer, err := semver.NewVersion(headerVer)
+		reqVer, err := versionFromHeader(c.Request)
 		if err != nil {
-			sendAPIError(c, fmt.Errorf("%w: invalid Infra-Version header: %s", internal.ErrBadRequest, err))
+			sendAPIError(c, err)
 			return
 		}
 		versions := a.versions[routeKey{method: route.method, path: route.path}]
@@ -191,6 +182,22 @@ type routeKey struct {
 type routeVersion struct {
 	version *semver.Version
 	handler func(c *gin.Context)
+}
+
+func versionFromHeader(req *http.Request) (*semver.Version, error) {
+	headerVer := req.Header.Get("Infra-Version")
+	// TODO: remove in v0.15.0, so this becomes an error
+	if headerVer == "" {
+		headerVer = "0.0.0"
+	}
+	if headerVer == "" {
+		return nil, fmt.Errorf("%w: Infra-Version header required", internal.ErrBadRequest)
+	}
+	reqVer, err := semver.NewVersion(headerVer)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid Infra-Version header: %s", internal.ErrBadRequest, err)
+	}
+	return reqVer, nil
 }
 
 func handlerForVersion(versions []routeVersion, reqVer *semver.Version) func(c *gin.Context) {

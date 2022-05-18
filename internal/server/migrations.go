@@ -128,6 +128,8 @@ func (a *API) addResponseRewrites() {
 	})
 	// next migration...
 
+	// TODO: populate this map somewhere closer to the handler definitions
+	// TODO: enforce that the slice of versions is sorted before building routes
 	a.versions[routeKey{http.MethodGet, "/api/grants"}] = []routeVersion{
 		{
 			version: semver.MustParse("0.12.2"),

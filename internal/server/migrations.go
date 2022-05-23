@@ -4,19 +4,23 @@ import (
 	"net/http"
 
 	"github.com/Masterminds/semver/v3"
-
 	"github.com/infrahq/infra/api"
 	"github.com/infrahq/infra/uid"
 )
 
+// TODO: enforce that the slice of versions is sorted before building routes
 func (a *API) populateVersionHandlers() {
-	// TODO: populate this map somewhere closer to the handler definitions
-	// TODO: enforce that the slice of versions is sorted before building routes
-	a.versions[routeKey{http.MethodGet, "/api/grants"}] = []routeVersion{
-		{
-			version: semver.MustParse("0.12.2"),
-			handler: wrapHandler(listGrantsV0_12_2),
+	a.versions = map[routeKey][]routeVersion{
+		routeKey{http.MethodGet, "/api/grants"}: {
+			version("0.12.2", listGrantsV0_12_2),
 		},
+	}
+}
+
+func version[Req, Res any](v string, handler HandlerFunc[Req, Res]) routeVersion {
+	return routeVersion{
+		version: semver.MustParse(v),
+		handler: wrapHandler(handler),
 	}
 }
 

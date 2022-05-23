@@ -12,7 +12,7 @@ infra providers add okta \
 ```
 
 
-## Configure Okta and retrieve required values
+## Configure Okta
 
 ### Login to the Okta dashboard
 

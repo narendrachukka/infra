@@ -1,3 +1,8 @@
+---
+title: CLI reference
+position: 2
+---
+
 # CLI Reference
 
 ## Commands
@@ -62,20 +67,20 @@ infra logout [SERVER] [flags]
 ```
 # Log out of current server
 $ infra logout
-		
+
 # Log out of a specific server
 $ infra logout infraexampleserver.com
-		
+
 # Logout of all servers
-$ infra logout --all 
-		
-# Log out of current server and clear from list 
+$ infra logout --all
+
+# Log out of current server and clear from list
 $ infra logout --clear
-		
+
 # Log out of a specific server and clear from list
-$ infra logout infraexampleserver.com --clear 
-		
-# Logout and clear list of all servers 
+$ infra logout infraexampleserver.com --clear
+
+# Logout and clear list of all servers
 $ infra logout --all --clear
 ```
 

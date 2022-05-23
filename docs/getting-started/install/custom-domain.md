@@ -1,5 +1,9 @@
-# Custom Domain
+---
+title: Custom domain
+position: 4
+---
 
+# Custom Domain
 
 ## Find your Infra Registry endpoint
 

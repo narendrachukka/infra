@@ -5,8 +5,6 @@ position: 2
 
 # Quickstart
 
-In this quickstart we'll set up Infra to manage user access to a Kubernetes cluster.
-
 ## Prerequisites
 
 * Install [helm](https://helm.sh/docs/intro/install/) (v3+)
@@ -59,7 +57,7 @@ helm install infra infrahq/infra
 Next, log into your instance of Infra to setup your admin account:
 
 ```
-infra login localhost --skip-tls-verify
+infra login localhost
 ```
 
 
@@ -123,7 +121,7 @@ infra grants add user@example.com example-cluster --role view
 Use the one-time password in the previous step to log in as the user. You'll be prompted to change the user's password since it's this new user's first time logging in.
 
 ```
-infra login localhost --skip-tls-verify
+infra login localhost
 ```
 
 Next, view this user's cluster access. You should see the user has `view` access to the `example-cluster` cluster connected above:
@@ -153,6 +151,5 @@ Congratulations, you've:
 
 * [Connect Okta](../guides/identity-providers/okta.md) to onboard & offboard your team automatically
 * [Manage & revoke access](../guides/granting-access.md) to users or groups
-* [Understand Kubernetes roles](../connectors/kubernetes.md#roles) for understand different access levels Infra supports for Kubernetes
-* [Customize your install](../install/install-on-kubernetes.md)
+* [Customize](../reference/helm-reference.md) your install with `helm`
 

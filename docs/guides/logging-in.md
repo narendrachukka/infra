@@ -12,10 +12,6 @@ position: 1
 ```
 brew install infrahq/tap/infra
 ```
-You may need to perform `brew link` if your symlinks are not working.
-```
-brew link infrahq/tap/infra
-```
 {% /tab %}
 {% tab label="Windows" %}
 ```powershell
@@ -44,10 +40,9 @@ sudo dnf install infra
 infra login SERVER
 ```
 
-> **Don't know your Infra server?**
-> Ask your Infra team for the hostname that you should use to login.
-
 ## See what you can access
+
+Run `infra list` to view what you have access to:
 
 ```
 infra list

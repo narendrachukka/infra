@@ -1,12 +1,6 @@
 # Kubernetes
 
-## Install the connector
-
-In order to add connectors to Infra, you will need to set three pieces of information:
-
-* `connector.config.name` is a name you give to identify this cluster
-* `connector.config.server` is the hostname or IP address the connector will use to communicate with the Infra server.
-* `connector.config.accessKey` is the access key the connector will use to communicate with the server.
+## Connecting a cluster
 
 First, generate an access key:
 
@@ -18,14 +12,13 @@ Next, use this access key to connect your cluster:
 
 ```bash
 helm upgrade --install infra-connector infrahq/infra \
-    --set connector.config.server=INFRA_URL \
+    --set connector.config.server=INFRA_SERVER_HOSTNAME \
     --set connector.config.accessKey=ACCESS_KEY \
-    --set connector.config.name=example-name \
+    --set connector.config.name=example-cluster-name \
     --set connector.config.skipTLSVerify=true # only include if you have not yet configured certificates
 ```
 
-
-## Granting access
+## Managing access
 
 Once you've connected a cluster, you can grant access via `infra grants add`:
 

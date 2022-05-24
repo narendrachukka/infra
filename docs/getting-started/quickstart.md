@@ -97,13 +97,9 @@ Prepare your values:
 
 Install the Infra connector via `helm`:
 
-```
-helm upgrade --install infra-connector infrahq/infra \
-  --set connector.config.name=example-cluster \
-  --set connector.config.server=<INFRA_SERVER_HOSTNAME> \
-  --set connector.config.accessKey=<ACCESS_KEY> \
-  --set connector.config.skipTLSVerify=true
-```
+>```
+>helm upgrade --install infra-connector infrahq/infra --set connector.config.name=example-cluster --set connector.config.accessKey=$ACCESS_KEY --set connector.config.server=$INFRA_SERVER_HOSTNAME --set connector.config.skipTLSVerify=true
+>```
 
 | Note: it may take a few minutes for the cluster to connect. You can verify the connection by running `infra destinations list`
 

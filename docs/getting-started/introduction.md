@@ -20,7 +20,7 @@ If you don't have an identity provider, Infra supports local users for you to ge
 
 ### Example (Kubernetes)
 
-```bash
+```
 # Log in as henry@acme.com via Okta
 $ infra login infra.acme.dev
   ... logging in with Okta

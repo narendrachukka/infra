@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.13.2](https://github.com/infrahq/infra/compare/v0.13.1...v0.13.2) (2022-05-30)
+
+
+### Bug Fixes
+
+* release build should not contain dev ([f26db74](https://github.com/infrahq/infra/commit/f26db74ea62fb61f5742a00fa8ed26ca22f8eb91))
+
 ### [0.13.1](https://github.com/infrahq/infra/compare/v0.13.0...v0.13.1) (2022-05-27)
 
 
